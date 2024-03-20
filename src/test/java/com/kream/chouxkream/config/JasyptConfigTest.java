@@ -1,12 +1,9 @@
 package com.kream.chouxkream.config;
 
-import org.assertj.core.api.Assertions;
-import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
-import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class JasyptConfigTest {
 
@@ -14,7 +11,7 @@ class JasyptConfigTest {
     public void stringEncryptor() {
 
         String encrptKey = System.getProperty("jasypt.encryptor.password");
-        String plainText = "test";
+        String plainText = "jdbc:mysql://localhost:3306/jwt_study?UTC&characterEncoding=UTF-8";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encrptKey);
@@ -25,7 +22,7 @@ class JasyptConfigTest {
         System.out.println("encryptedText = " + encryptedText);
         System.out.println("decryptedText = " + decryptedText);
 
-        Assertions.assertThat(plainText).isEqualTo(decryptedText);
+        assertThat(plainText).isEqualTo(decryptedText);
     }
 
 }
