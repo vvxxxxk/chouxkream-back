@@ -1,5 +1,6 @@
 package com.kream.chouxkream.user.model.entity;
 
+import com.kream.chouxkream.user.model.dto.UserRoleKey;
 import lombok.Getter;
 import lombok.Setter;
 

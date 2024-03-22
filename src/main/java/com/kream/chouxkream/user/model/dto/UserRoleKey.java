@@ -1,4 +1,4 @@
-package com.kream.chouxkream.user.model.entity;
+package com.kream.chouxkream.user.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,7 @@
 package com.kream.chouxkream.common.config;
 
 import com.kream.chouxkream.jwt.JwtUtils;
+import com.kream.chouxkream.jwt.filter.JwtVerificationFilter;
 import com.kream.chouxkream.jwt.filter.LoginFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -66,9 +67,13 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/**").permitAll());
+                        .antMatchers("/", "/all", "/api/**").permitAll()
+                        .antMatchers("/user").hasRole("USER")               // 임시. 권한 테스트용
+                        .antMatchers("/admin").hasRole("ADMIN"));           // 임시. 권한 테스트용
 
         // 필터 등록
+        http
+                .addFilterBefore(new JwtVerificationFilter(jwtUtils), LoginFilter.class);
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils), UsernamePasswordAuthenticationFilter.class);
 
