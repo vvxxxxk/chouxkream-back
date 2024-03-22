@@ -1,9 +1,17 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ENC(q4cjF7CafKDOecKiSw/QQMxAK7wY6gLt/rn1tnUX0FEGB0NG1JZwnx+zb2PX9hFqyoVdccnpO0fLi6Y6WriC/tWEQZ0hQcG93ZJKi8um56E=)
+    url: ENC(pV4U34jYLOq3zvo24D8Ep4CG/Jsqnpzq2QFGEUjW6x9oBj6onPpAz5b3fmPZ+TZABeivgJczY2X1qpLZas7+gJazEmjByF2OdQHX3laief4=)
     username: ENC(lhY3kENol+ww5kqBkhfE7g==)
     password: ENC(CoYG43yHrCTjLDy/c5rizA==)
+  jwt:
+    secret: secret=ENC(JrnAhpcXNz1dE5ohGVH0AdA9bu94pGJDaKRc+vmRabPdK0nSB72QnpNYDCweWtwTdh0b1P0xM/QIk0DoolLvtMt+3Ipgp5XDAhg1wzB2JO8=)
+  jpa:
+    show-sql: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
 
 cors:
   host: http://localhost:3000

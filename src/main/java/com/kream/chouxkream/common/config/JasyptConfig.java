@@ -1,4 +1,4 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;

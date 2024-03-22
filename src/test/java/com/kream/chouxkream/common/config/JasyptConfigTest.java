@@ -1,4 +1,4 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,8 @@ class JasyptConfigTest {
     public void stringEncryptor() {
 
         String encrptKey = System.getProperty("jasypt.encryptor.password");
-        String plainText = "jdbc:mysql://localhost:3306/jwt_study?UTC&characterEncoding=UTF-8";
+        // String plainText = "jdbc:mysql://localhost:3306/chouxkream_db?UTC&characterEncoding=UTF-8";
+        String plainText = "aslmdlsmaldmlnqwnenqwenocxcipajoidnsndjnaldnskldnsalkdmslakdmlsamdsdsas";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encrptKey);
