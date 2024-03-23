@@ -12,7 +12,7 @@ public class JasyptTest extends JasyptConfig {
     public void jasypt_encrypt_decrypt_test() {
         String encryptKey = System.getProperty("jasypt.encryptor.password");
 
-        String plainText = "jdbc:mysql://localhost:3306";
+        String plainText = "jdbc:mysql://localhost:3306/test";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encryptKey);
