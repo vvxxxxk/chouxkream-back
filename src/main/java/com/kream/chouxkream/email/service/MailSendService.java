@@ -4,6 +4,7 @@ import com.kream.chouxkream.redis.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -46,7 +47,10 @@ public class MailSendService {
     }
 
 
+
+
     //mail을 어디서 보내는지, 어디로 보내는지 , 인증 번호를 html 형식으로 어떻게 보내는지 작성합니다.
+    @Async
     public String joinEmail(String email) {
         makeRandomNumber();
         String setFrom = "dionisos198@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
@@ -61,6 +65,7 @@ public class MailSendService {
         mailSend(setFrom, toMail, title, content);
         return Integer.toString(authNumber);
     }
+
 
     //이메일을 전송합니다.
     public void mailSend(String setFrom, String toMail, String title, String content) {
