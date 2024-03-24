@@ -1,14 +1,14 @@
 package com.kream.chouxkream.common.config;
 
 import com.kream.chouxkream.jwt.JwtUtils;
+import com.kream.chouxkream.jwt.filter.JwtLogoutFilter;
 import com.kream.chouxkream.jwt.filter.JwtVerificationFilter;
-import com.kream.chouxkream.jwt.filter.LoginFilter;
+import com.kream.chouxkream.jwt.filter.JwtLoginFilter;
 import com.kream.chouxkream.jwt.service.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -76,9 +77,11 @@ public class SecurityConfig {
 
         // 필터 등록
         http
-                .addFilterBefore(new JwtVerificationFilter(jwtUtils), LoginFilter.class);
+                .addFilterBefore(new JwtLogoutFilter(jwtUtils, jwtService), LogoutFilter.class);
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
+        http
+                .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
 
         // 폼 로그인 비활성화
         http

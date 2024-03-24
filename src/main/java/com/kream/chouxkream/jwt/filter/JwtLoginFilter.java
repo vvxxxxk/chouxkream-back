@@ -1,7 +1,7 @@
 package com.kream.chouxkream.jwt.filter;
 
 import com.kream.chouxkream.jwt.JwtUtils;
-import com.kream.chouxkream.jwt.constants.JwtConst;
+import com.kream.chouxkream.jwt.repository.JwtRepository;
 import com.kream.chouxkream.jwt.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,13 +22,13 @@ import java.util.Iterator;
 
 import static com.kream.chouxkream.jwt.constants.JwtConst.*;
 
-public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     private final JwtService jwtService;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils, JwtService jwtService) {
+    public JwtLoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils, JwtService jwtService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.jwtService = jwtService;
