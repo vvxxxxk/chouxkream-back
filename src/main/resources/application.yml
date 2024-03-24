@@ -8,6 +8,10 @@ spring:
     secret: secret=ENC(JrnAhpcXNz1dE5ohGVH0AdA9bu94pGJDaKRc+vmRabPdK0nSB72QnpNYDCweWtwTdh0b1P0xM/QIk0DoolLvtMt+3Ipgp5XDAhg1wzB2JO8=)
   jpa:
     show-sql: true
+  redis:
+    port: 6379
+    host: localhost
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

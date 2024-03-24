@@ -2,6 +2,7 @@ package com.kream.chouxkream.jwt.filter;
 
 import com.kream.chouxkream.jwt.JwtUtils;
 import com.kream.chouxkream.jwt.constants.JwtConst;
+import com.kream.chouxkream.jwt.service.JwtService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,10 +26,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    public LoginFilter(AuthenticationManager authenticationManager, JwtUtils jwtUtils, JwtService jwtService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.jwtService = jwtService;
 
         // default url, username 파라미터 변경
         setFilterProcessesUrl("/api/login");
@@ -65,6 +68,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtils.createJwt(ACCESS_TOKEN_TYPE, email, role, ACCESS_TOKEN_EXPIRED_MS);
         // refresh token 생성, 24시간
         String refreshToken = jwtUtils.createJwt(REFRESH_TOKEN_TYPE, email, role, REFRESH_TOKEN_EXPRED_MS);
+
+        // refresh token Redis 저장
+        jwtService.saveRefreshToken(refreshToken, email);
 
         // response
         response.setHeader(ACCESS_TOKEN_TYPE, accessToken);

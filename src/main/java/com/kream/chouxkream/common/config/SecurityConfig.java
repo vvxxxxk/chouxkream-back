@@ -3,6 +3,7 @@ package com.kream.chouxkream.common.config;
 import com.kream.chouxkream.jwt.JwtUtils;
 import com.kream.chouxkream.jwt.filter.JwtVerificationFilter;
 import com.kream.chouxkream.jwt.filter.LoginFilter;
+import com.kream.chouxkream.jwt.service.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,13 +29,15 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
+    private final JwtService jwtService;
 
     @Value("${cors.host}")
     private String WEB_HOST;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, JwtService jwtService) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtils = jwtUtils;
+        this.jwtService = jwtService;
     }
 
     @Bean
@@ -67,7 +70,7 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/", "/all", "/api/**").permitAll()
+                        .antMatchers("/", "/all", "/redis", "/api/**").permitAll()
                         .antMatchers("/user").hasRole("USER")               // 임시. 권한 테스트용
                         .antMatchers("/admin").hasRole("ADMIN"));           // 임시. 권한 테스트용
 
@@ -75,7 +78,7 @@ public class SecurityConfig {
         http
                 .addFilterBefore(new JwtVerificationFilter(jwtUtils), LoginFilter.class);
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
 
         // 폼 로그인 비활성화
         http
