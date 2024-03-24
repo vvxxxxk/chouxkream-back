@@ -1,6 +1,6 @@
 package com.kream.chouxkream.user.repository;
 
-import com.kream.chouxkream.user.entity.User;
+import com.kream.chouxkream.user.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

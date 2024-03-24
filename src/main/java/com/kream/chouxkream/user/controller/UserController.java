@@ -1,6 +1,6 @@
 package com.kream.chouxkream.user.controller;
 
-import com.kream.chouxkream.user.dto.UserDTO;
+import com.kream.chouxkream.user.model.dto.UserDTO;
 import com.kream.chouxkream.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

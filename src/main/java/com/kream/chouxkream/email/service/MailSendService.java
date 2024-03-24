@@ -1,6 +1,7 @@
 package com.kream.chouxkream.email.service;
 
 import com.kream.chouxkream.redis.RedisUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -12,11 +13,11 @@ import javax.mail.internet.MimeMessage;
 import java.util.Random;
 
 @Service
+@RequiredArgsConstructor
 public class MailSendService {
-    @Autowired
-    private JavaMailSender mailSender;
-    @Autowired
-    private  RedisUtil redisUtil;
+
+    private final JavaMailSender mailSender;
+    private final RedisUtil redisUtil;
     private int authNumber;
 
 
