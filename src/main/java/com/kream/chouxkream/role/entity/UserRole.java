@@ -17,10 +17,12 @@ public class UserRole {
     private UserRoleId id;
 
     @ManyToOne
-    @MapsId("userId")
+    @MapsId("user_no")
+    @JoinColumn(name = "user_no")
     private User user;
 
     @ManyToOne
-    @MapsId("roleId")
-    private Role role;;
+    @MapsId("role_id")
+    @JoinColumn(name = "role_id")
+    private Role role;
 }

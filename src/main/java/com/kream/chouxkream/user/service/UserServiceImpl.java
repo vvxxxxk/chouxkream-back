@@ -1,7 +1,11 @@
 package com.kream.chouxkream.user.service;
 
+import com.kream.chouxkream.role.UserRoleId;
+import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.entity.UserRole;
+import com.kream.chouxkream.role.repository.RoleRepository;
 import com.kream.chouxkream.role.repository.UserRoleRepository;
+import com.kream.chouxkream.role.service.RoleService;
 import com.kream.chouxkream.user.model.dto.UserDTO;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.repository.UserRepository;
@@ -19,6 +23,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRoleRepository userRoleRepository;
+    private final RoleRepository roleRepository;
+
 
     @Override
     @Transactional
@@ -30,12 +36,16 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.save(userDto.toEntity());
         user.encodePassword(passwordEncoder);
 
-        /*
+        Role role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RuntimeException("Default role not Found"));
+
+        UserRoleId userRoleId = new UserRoleId(user.getUserNo(), role.getRoleId());
         UserRole userRole = new UserRole();
+        userRole.setId(userRoleId);
         userRole.setUser(user);
-        userRole.setRole(Role.USER);
+        userRole.setRole(role);
         userRoleRepository.save(userRole);
-        */
+
         return user.getUserNo();
     }
 }
