@@ -27,14 +27,12 @@ import java.util.Collections;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity  // 스프링 시큐리티를 통해 웹 보안 설정 활성화
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // jwt
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
     private final AuthService authService;
-    // oauth2
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
@@ -53,12 +51,6 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
 
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
     @Bean
@@ -106,10 +98,8 @@ public class SecurityConfig {
         // 필터 등록
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, authService), LogoutFilter.class);
-//        http
-//                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
         http
-                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
+                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
         http
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, authService), UsernamePasswordAuthenticationFilter.class);
 

@@ -9,7 +9,7 @@ import com.kream.chouxkream.user.model.entity.UserRole;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
     public Long signUp(UserJoinDto userJoinDto) throws Exception {
@@ -31,9 +31,9 @@ public class UserService {
         if (userRepository.findByEmail(userJoinDto.getEmail()).isPresent()){
             throw new Exception("이미 존재하는 이메일입니다.");
         }
-
+        System.out.println("userJoinDto.toEntity().getCreateDate() = " + userJoinDto.toEntity().getCreateDate());
         User user = userRepository.save(userJoinDto.toEntity());
-        user.encodePassword(passwordEncoder);
+        user.encodePassword(bCryptPasswordEncoder);
 
         Role role = roleRepository.findByRoleName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Default role not Found"));
@@ -48,6 +48,7 @@ public class UserService {
         return user.getUserNo();
     }
 
+    @Transactional
     public String findEmailProcess(String phoneNumber) {
 
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);

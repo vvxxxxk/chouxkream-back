@@ -2,6 +2,7 @@ package com.kream.chouxkream.auth.filter;
 
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
+import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -77,15 +78,33 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         user.setEmail(email);
         role.setRoleName(role_name);
 
-        // UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
-        OAuth2UserImpl oAuth2User = new OAuth2UserImpl(user, role);
+        if (role_name.equals("ROLE_USER") || role_name.equals("ROLE_ADMIN")) {
 
-        // 스프링 시큐리티 인증 토큰 생성
-        //Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
-        Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
-        // 세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+            UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
 
-        filterChain.doFilter(request, response);
+            // 스프링 시큐리티 인증 토큰 생성
+            Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
+            // 세션에 사용자 등록
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            filterChain.doFilter(request, response);
+        } else if (role_name.equals("ROLE_SOCIAL")) {
+
+            OAuth2UserImpl oAuth2User = new OAuth2UserImpl(user, role);
+
+            // 스프링 시큐리티 인증 토큰 생성
+            Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
+            // 세션에 사용자 등록
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            filterChain.doFilter(request, response);
+        } else {
+
+            // response body
+            PrintWriter writer = response.getWriter();
+            writer.print("invalid role_name");
+
+            // response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
     }
 }

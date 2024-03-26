@@ -2,6 +2,7 @@ package com.kream.chouxkream.user.model.entity;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @DynamicInsert
+@DynamicUpdate
 public class User {
 
     @Id
@@ -40,19 +42,20 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    @Column(columnDefinition = "int default 0")
     private int point;
 
-    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(columnDefinition = "timestamp default current_timestamp")
     private Timestamp createDate;
 
-    @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+    @Column(columnDefinition = "timestamp default current_timestamp on update current_timestamp")
     private Timestamp updateDate;
 
-    @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
+    @Column(columnDefinition = "bit default 0")
     private boolean isActive;
 
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<UserRole> userRoles = new HashSet<>();
 

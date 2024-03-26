@@ -44,6 +44,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         String email = obtainUsername(request);
         String password = obtainPassword(request);
 
+        System.out.println("password = " + password);
+
         // 스프링 시큐리티에서 username, password 검증하려면 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
 
@@ -72,7 +74,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         authService.saveRefreshToken(refreshToken, email);
 
         // create cookie (access, refresh)
-        response.addCookie(createCookie(ACCESS_TOKEN_TYPE, accessToken));
+        //response.addCookie(createCookie(ACCESS_TOKEN_TYPE, accessToken));
+        response.setHeader("access", accessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
         // response

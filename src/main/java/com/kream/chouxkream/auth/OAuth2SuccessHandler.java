@@ -45,14 +45,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String accessToken = jwtUtils.createJwt(ACCESS_TOKEN_TYPE, email, role, ACCESS_TOKEN_EXPIRED_MS);
+        // String accessToken = jwtUtils.createJwt(ACCESS_TOKEN_TYPE, email, role, ACCESS_TOKEN_EXPIRED_MS);
         String refreshToken = jwtUtils.createJwt(REFRESH_TOKEN_TYPE, email, role, REFRESH_TOKEN_EXPRED_MS);
 
         // refresh token Redis 저장
         jwtService.saveRefreshToken(refreshToken, email);
 
         // create cookie (access, refresh)
-        response.addCookie(createCookie(ACCESS_TOKEN_TYPE, accessToken));
+        //response.addCookie(createCookie(ACCESS_TOKEN_TYPE, accessToken));
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
         // response
