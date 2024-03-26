@@ -1,4 +1,4 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

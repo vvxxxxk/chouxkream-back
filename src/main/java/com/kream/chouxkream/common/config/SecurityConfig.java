@@ -1,6 +1,7 @@
 package com.kream.chouxkream.common.config;
 
 import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.OAuth2SuccessHandler;
 import com.kream.chouxkream.auth.filter.*;
 import com.kream.chouxkream.auth.service.AuthService;
 import com.kream.chouxkream.auth.service.OAuth2UserService;

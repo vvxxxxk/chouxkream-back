@@ -1,4 +1,4 @@
-package com.kream.chouxkream.auth.filter;
+package com.kream.chouxkream.auth;
 
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;

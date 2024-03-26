@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-// @Transactional(readOnly = true) // 해당코드가 존재하지 않을경우 pw 암호화가 정상적으로 작동하지 않았음 이유가 무엇인지
+@Transactional(readOnly = true) // 해당코드가 존재하지 않을경우 pw 암호화가 정상적으로 작동하지 않았음 이유가 무엇인지
 public class UserService {
 
     private final UserRepository userRepository;
@@ -25,7 +25,7 @@ public class UserService {
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Long signUp(UserJoinDto userJoinDto) throws Exception {
 
         if (userRepository.findByEmail(userJoinDto.getEmail()).isPresent()){
