@@ -1,29 +1,22 @@
 package com.kream.chouxkream.user.controller;
 
 import com.google.gson.JsonObject;
-import com.kream.chouxkream.user.model.entity.User;
-import com.kream.chouxkream.user.service.UserDetailsServiceImpl;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.kream.chouxkream.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 public class UserController {
 
-    private final UserDetailsServiceImpl userDetailsService;
-
-    public UserController(UserDetailsServiceImpl userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    private final UserService userService;
 
     @PostMapping("/api/login/find-email")
     public String findEmailProcess(@RequestParam("phoneNumber") String phoneNumber) {
 
-        String findEmail = userDetailsService.findEmailProcess(phoneNumber);
-
-        // String findEmail = userService.findEmailProcess(phoneNumber);
+        String findEmail = userService.findEmailProcess(phoneNumber);
 
         JsonObject jsonObject = new JsonObject();
 

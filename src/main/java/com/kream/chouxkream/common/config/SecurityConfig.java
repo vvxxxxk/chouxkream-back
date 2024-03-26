@@ -1,13 +1,9 @@
 package com.kream.chouxkream.common.config;
 
-import com.kream.chouxkream.jwt.JwtUtils;
-import com.kream.chouxkream.jwt.filter.JWTFilter;
-import com.kream.chouxkream.jwt.filter.JwtLogoutFilter;
-import com.kream.chouxkream.jwt.filter.JwtVerificationFilter;
-import com.kream.chouxkream.jwt.filter.JwtLoginFilter;
-import com.kream.chouxkream.jwt.service.JwtService;
-import com.kream.chouxkream.oauth2.OAuth2SuccessHandler;
-import com.kream.chouxkream.oauth2.service.OAuth2UserService;
+import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.filter.*;
+import com.kream.chouxkream.auth.service.AuthService;
+import com.kream.chouxkream.auth.service.OAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,8 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,7 +30,7 @@ public class SecurityConfig {
     // jwt
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
-    private final JwtService jwtService;
+    private final AuthService jwtService;
     // oauth2
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -44,7 +38,7 @@ public class SecurityConfig {
     @Value("${cors.host}")
     private String WEB_HOST;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, JwtService jwtService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, AuthService jwtService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtils = jwtUtils;
         this.jwtService = jwtService;
@@ -101,10 +95,10 @@ public class SecurityConfig {
         // 필터 등록
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, jwtService), LogoutFilter.class);
-        http
-                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
 //        http
-//                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
+//                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
+        http
+                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
         http
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
 
