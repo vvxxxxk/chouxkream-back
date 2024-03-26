@@ -1,10 +1,11 @@
 package com.kream.chouxkream.test.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class AuthTestController {
+public class JwtTestController {
 
     @GetMapping("/all")
     public String allPage() {
@@ -20,6 +21,5 @@ public class AuthTestController {
     public String adminPage() {
         return "관리자 접근 가능 페이지";
     }
-
 
 }

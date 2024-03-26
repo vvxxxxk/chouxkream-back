@@ -12,7 +12,7 @@ class JasyptConfigTest {
 
         String encrptKey = System.getProperty("jasypt.encryptor.password");
         // String plainText = "jdbc:mysql://localhost:3306/chouxkream_db?UTC&characterEncoding=UTF-8";
-        String plainText = "dasdsad";
+        String plainText = "3hQWN6zPEf";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encrptKey);

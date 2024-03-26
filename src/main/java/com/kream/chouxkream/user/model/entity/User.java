@@ -2,6 +2,7 @@ package com.kream.chouxkream.user.model.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -11,6 +12,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@DynamicInsert
 public class User {
 
     public User() {

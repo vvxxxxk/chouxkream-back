@@ -2,6 +2,7 @@ package com.kream.chouxkream.jwt.filter;
 
 import com.kream.chouxkream.jwt.JwtUtils;
 import com.kream.chouxkream.jwt.constants.JwtConst;
+import com.kream.chouxkream.oauth2.model.dto.OAuth2UserImpl;
 import com.kream.chouxkream.user.model.dto.UserDetailsImpl;
 import com.kream.chouxkream.user.model.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
@@ -32,6 +33,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        System.out.println("JwtVerificationFilter.doFilterInternal");
         // 헤더에서 access키에 담긴 토큰을 꺼냄
         String accessToken = request.getHeader(ACCESS_TOKEN_TYPE);
 
@@ -78,10 +80,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         user.setEmail(email);
         role.setRoleName(role_name);
 
-        UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
+        // UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
+        OAuth2UserImpl oAuth2User = new OAuth2UserImpl(user, role);
 
         // 스프링 시큐리티 인증 토큰 생성
-        Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
+        //Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
+        Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
         // 세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
 

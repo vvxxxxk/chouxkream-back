@@ -1,10 +1,13 @@
 package com.kream.chouxkream.common.config;
 
 import com.kream.chouxkream.jwt.JwtUtils;
+import com.kream.chouxkream.jwt.filter.JWTFilter;
 import com.kream.chouxkream.jwt.filter.JwtLogoutFilter;
 import com.kream.chouxkream.jwt.filter.JwtVerificationFilter;
 import com.kream.chouxkream.jwt.filter.JwtLoginFilter;
 import com.kream.chouxkream.jwt.service.JwtService;
+import com.kream.chouxkream.oauth2.OAuth2SuccessHandler;
+import com.kream.chouxkream.oauth2.service.OAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,23 +25,31 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity  // 스프링 시큐리티를 통해 웹 보안 설정 활성화
 public class SecurityConfig {
 
+    // jwt
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
     private final JwtService jwtService;
+    // oauth2
+    private final OAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Value("${cors.host}")
     private String WEB_HOST;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, JwtService jwtService) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, JwtService jwtService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtils = jwtUtils;
         this.jwtService = jwtService;
+        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -62,6 +73,18 @@ public class SecurityConfig {
                 .cors()
                 .configurationSource(corsConfigurationSource());
 
+        //HTTP Basic 인증 방식 disable
+        http
+                .httpBasic().disable();
+
+        // oauth2
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(oAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                );
+
         // 세션 비활성화
         http
                 .sessionManagement()
@@ -72,14 +95,16 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .antMatchers("/", "/all", "/redis", "/api/**").permitAll()
-                        .antMatchers("/user").hasRole("USER")               // 임시. 권한 테스트용
-                        .antMatchers("/admin").hasRole("ADMIN"));           // 임시. 권한 테스트용
+                        .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")  // 임시. 권한 테스트용
+                        .antMatchers("/admin").hasRole("ADMIN"));                  // 임시. 권한 테스트용
 
         // 필터 등록
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, jwtService), LogoutFilter.class);
         http
                 .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
         http
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
 
@@ -97,7 +122,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(WEB_HOST)); // cors 허용 url
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Collections.singletonList("*"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
