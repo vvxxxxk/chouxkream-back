@@ -3,13 +3,8 @@ package com.kream.chouxkream.common.config;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.Test;
 
-<<<<<<< HEAD:src/test/java/com/kream/chouxkream/config/JasyptConfigTest.java
-import static org.junit.jupiter.api.Assertions.*;
-/*
-=======
 import static org.assertj.core.api.Assertions.*;
 
->>>>>>> origin/vvxxxxk:src/test/java/com/kream/chouxkream/common/config/JasyptConfigTest.java
 class JasyptConfigTest {
 
     @Test
@@ -30,5 +25,4 @@ class JasyptConfigTest {
 
         assertThat(plainText).isEqualTo(decryptedText);
     }
-
-}*/
+}

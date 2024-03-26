@@ -1,4 +1,4 @@
-package com.kream.chouxkream.auth.model.dto;
+package com.kream.chouxkream.user.model.dto;
 
 import com.kream.chouxkream.user.model.entity.User;
 import lombok.*;
@@ -11,8 +11,8 @@ import javax.validation.constraints.Pattern;
 @Setter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
-public class AuthDTO {
+public class UserJoinDto {
+
     @NotBlank(message = "email 입력 필수!")
     private String email;
 
@@ -29,7 +29,6 @@ public class AuthDTO {
         return User.builder()
                 .email(email)
                 .password(password)
-                //.role(Role.USER)
                 .phoneNumber(phoneNumber)
                 .build();
     }

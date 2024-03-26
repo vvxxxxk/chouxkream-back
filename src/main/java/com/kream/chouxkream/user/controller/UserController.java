@@ -1,17 +1,25 @@
 package com.kream.chouxkream.user.controller;
 
 import com.google.gson.JsonObject;
+import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
+
+    @PostMapping("/api/user/join")
+    @ResponseStatus(HttpStatus.OK)
+    public Long join(@Valid @RequestBody UserJoinDto userJoinDto) throws Exception {
+        return userService.signUp(userJoinDto);
+    }
 
     @PostMapping("/api/login/find-email")
     public String findEmailProcess(@RequestParam("phoneNumber") String phoneNumber) {

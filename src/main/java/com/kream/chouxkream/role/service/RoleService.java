@@ -18,7 +18,7 @@ public class RoleService {
     private final UserRoleRepository userRoleRepository;
 
             public String findRoleIdByRoleName(String roleName){
-                Optional<Role> opRole = roleRepository.findByName(roleName);
+                Optional<Role> opRole = roleRepository.findByRoleName(roleName);
                 if(opRole.isPresent()){
                     Role role = opRole.get();
                     return role.getRoleName();
@@ -28,7 +28,7 @@ public class RoleService {
             }
 
             public void giveAdminRole(User user){
-                Role role = roleRepository.findByName("ADMIN")
+                Role role = roleRepository.findByRoleName("ADMIN")
                         .orElseThrow(() -> new RuntimeException("Default role not Found"));
                 UserRoleKey userRoleKey = new UserRoleKey(user.getUserNo(), role.getRoleId());
                 UserRole userRole = new UserRole();

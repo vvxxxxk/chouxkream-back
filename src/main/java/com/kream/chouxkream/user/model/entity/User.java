@@ -14,8 +14,8 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@DynamicInsert
 @Builder
+@DynamicInsert
 public class User {
 
     @Id

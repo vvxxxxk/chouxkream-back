@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,7 +32,7 @@ public class SecurityConfig {
     // jwt
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
-    private final AuthService jwtService;
+    private final AuthService authService;
     // oauth2
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -39,17 +40,23 @@ public class SecurityConfig {
     @Value("${cors.host}")
     private String WEB_HOST;
 
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, AuthService jwtService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, AuthService authService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtils = jwtUtils;
-        this.jwtService = jwtService;
+        this.authService = authService;
         this.oAuth2UserService = oAuth2UserService;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder(){
-        
+
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
@@ -90,20 +97,20 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .antMatchers("/", "/all", "/redis", "/api/**", "/api/user/login", 
-                                        "/api/auth/join", "/api/mail/**").permitAll()
+                                        "/api/auth/join", "/api/mail/**", "/api/user/join").permitAll()
                         .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());                  
 
         // 필터 등록
         http
-                .addFilterBefore(new JwtLogoutFilter(jwtUtils, jwtService), LogoutFilter.class);
+                .addFilterBefore(new JwtLogoutFilter(jwtUtils, authService), LogoutFilter.class);
 //        http
 //                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
         http
                 .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
         http
-                .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, authService), UsernamePasswordAuthenticationFilter.class);
 
         // 폼 로그인 비활성화
         http
