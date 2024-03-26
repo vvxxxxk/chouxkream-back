@@ -1,59 +1,130 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
+import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.filter.*;
+import com.kream.chouxkream.auth.service.AuthService;
+import com.kream.chouxkream.auth.service.OAuth2UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
-@EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .formLogin().disable()// 로그인 페이지와 기타 로그인 처리 및 성공 실패를 사용
-                .httpBasic().disable()
-                .cors().disable()
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                // 스프링 시큐리티가 세션정책을 생성하지도 않고 기존 것을 사용하지도 않음 -> jwt방식을 쓸때 사용
-                .and()
-                .authorizeRequests()
-                .antMatchers("/api/user/login").permitAll() //antmatchers ->특정 리소스의 권한 설정
-                .antMatchers("/api/auth/join").permitAll() //permitall -> 설정 리소스에 대한 접근을 인증없이 허용
-                .antMatchers("/api/mail/**").permitAll() // 회원가입 -> 메일 인증 관련 url
-                .antMatchers("/api/user").hasRole("USER") // user로 시작하는 모든 url은 인증후 유저레벨의 권한을 가진 사용자만 접근을 허용
-                .anyRequest().authenticated(); //모든 리소스를 의미하며 접근허용 리소스 및 인증후 특정 레벨의 권한을 가진 사용자만 접근가능한 리소스를 설정하고 그외 나머지 리소스들은 무조건 인증을 완료해야 접근이 가능
+@EnableWebSecurity  // 스프링 시큐리티를 통해 웹 보안 설정 활성화
+public class SecurityConfig {
+
+    // jwt
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtils jwtUtils;
+    private final AuthService jwtService;
+    // oauth2
+    private final OAuth2UserService oAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+
+    @Value("${cors.host}")
+    private String WEB_HOST;
+
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtils jwtUtils, AuthService jwtService, OAuth2UserService oAuth2UserService, OAuth2SuccessHandler oAuth2SuccessHandler) {
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtils = jwtUtils;
+        this.jwtService = jwtService;
+        this.oAuth2UserService = oAuth2UserService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
+        
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    private static final String[] AUTH_WHITELIST = {
-            "/v2/api-docs",
-            "/v3/api-docs/**",
-            "/configuration/ui",
-            "/swagger-resources/**",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/**",
-            "/file/**",
-            "/image/**",
-            "/swagger/**",
-            "/swagger-ui/**",
-            "/h2/**"
-    };
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
-    // 정적인 파일 요청에 대해 무시
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers(AUTH_WHITELIST);
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        // csrf 비활성화 및 cors 설정
+        http
+                .csrf().disable()
+                .cors()
+                .configurationSource(corsConfigurationSource());
+
+        //HTTP Basic 인증 방식 disable
+        http
+                .httpBasic().disable();
+
+        // oauth2
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(oAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                );
+
+        // 세션 비활성화
+        http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        // 접근 권한 설정
+        // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .antMatchers("/", "/all", "/redis", "/api/**", "/api/user/login", 
+                                        "/api/auth/join", "/api/mail/**").permitAll()
+                        .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
+                        .antMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().authenticated());                  
+
+        // 필터 등록
+        http
+                .addFilterBefore(new JwtLogoutFilter(jwtUtils, jwtService), LogoutFilter.class);
+//        http
+//                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
+        http
+                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
+        http
+                .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, jwtService), UsernamePasswordAuthenticationFilter.class);
+
+        // 폼 로그인 비활성화
+        http
+                .formLogin().disable()
+                .headers().frameOptions().disable();
+
+        return http.build();
+
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(List.of(WEB_HOST)); // cors 허용 url
+        configuration.setAllowedMethods(Collections.singletonList("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 해당 설정 적용
+
+        return source;
     }
 }

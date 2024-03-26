@@ -1,32 +1,32 @@
 package com.kream.chouxkream.user.model.entity;
 
-import lombok.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity(name = "user")
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@DynamicInsert
 @Builder
 public class User {
-    // 회원가입에서 요구되는 정보 : email, password, phonenumber
+
     @Id
-    @Column(name = "user_no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userNo;
 
-    @Column(length = 20, name = "email")
+    @Column(nullable = false, unique = true, length = 20)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     @Column(nullable = false)
-    private String phoneNumber;
+    private String password;
 
     @Column(nullable = true)
     private String username;
@@ -36,6 +36,9 @@ public class User {
 
     @Column(nullable = true)
     private String userDesc;
+
+    @Column(nullable = false)
+    private String phoneNumber;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int point;
@@ -49,11 +52,11 @@ public class User {
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean isActive;
 
-    /*
-    @Enumerated(EnumType.STRING)
-    @Column(name = "user_role")
-    private Role role;
-    */
+
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private Set<UserRole> userRoles = new HashSet<>();
+
+
     public void encodePassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(password);
     }
