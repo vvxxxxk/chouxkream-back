@@ -1,6 +1,6 @@
 package com.kream.chouxkream.auth.model.dto;
 
-import com.kream.chouxkream.user.model.entity.Role;
+import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

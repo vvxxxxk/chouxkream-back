@@ -1,11 +1,11 @@
 package com.kream.chouxkream.role.service;
 
-import com.kream.chouxkream.role.UserRoleId;
 import com.kream.chouxkream.role.entity.Role;
-import com.kream.chouxkream.role.entity.UserRole;
+import com.kream.chouxkream.user.model.dto.UserRoleKey;
+import com.kream.chouxkream.user.model.entity.UserRole;
 import com.kream.chouxkream.role.repository.RoleRepository;
-import com.kream.chouxkream.role.repository.UserRoleRepository;
 import com.kream.chouxkream.user.model.entity.User;
+import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class RoleService {
                 Optional<Role> opRole = roleRepository.findByName(roleName);
                 if(opRole.isPresent()){
                     Role role = opRole.get();
-                    return role.getName();
+                    return role.getRoleName();
                 }else{
                     throw new RuntimeException("Role not Found for roleName: "+ roleName);
                 }
@@ -30,9 +30,9 @@ public class RoleService {
             public void giveAdminRole(User user){
                 Role role = roleRepository.findByName("ADMIN")
                         .orElseThrow(() -> new RuntimeException("Default role not Found"));
-                UserRoleId userRoleId = new UserRoleId(user.getUserNo(), role.getRoleId());
+                UserRoleKey userRoleKey = new UserRoleKey(user.getUserNo(), role.getRoleId());
                 UserRole userRole = new UserRole();
-                userRole.setId(userRoleId);
+                userRole.setId(userRoleKey);
                 userRole.setUser(user);
                 userRole.setRole(role);
                 userRoleRepository.save(userRole);

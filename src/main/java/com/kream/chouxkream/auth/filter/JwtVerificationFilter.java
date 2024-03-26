@@ -2,7 +2,7 @@ package com.kream.chouxkream.auth.filter;
 
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
-import com.kream.chouxkream.user.model.entity.Role;
+import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -1,14 +1,17 @@
 package com.kream.chouxkream.user.model.entity;
 
+import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.dto.UserRoleKey;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class UserRole {
 
     @EmbeddedId

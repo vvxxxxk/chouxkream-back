@@ -1,10 +1,8 @@
 package com.kream.chouxkream.auth.filter;
 
 import com.kream.chouxkream.auth.JwtUtils;
-import com.kream.chouxkream.auth.constants.AuthConst;
-import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
 import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
-import com.kream.chouxkream.user.model.entity.Role;
+import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

@@ -1,10 +1,10 @@
 package com.kream.chouxkream.auth.service;
 
 import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
-import com.kream.chouxkream.user.model.entity.Role;
+import com.kream.chouxkream.role.entity.Role;
+import com.kream.chouxkream.role.repository.RoleRepository;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.UserRole;
-import com.kream.chouxkream.user.repository.RoleRepository;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             User user = optionalUser.get();
             List<UserRole> userRoles = userRoleRepository.findByIdUserNo(user.getUserNo());
             if (!userRoles.isEmpty()) {
+
 
                 Role role = roleRepository.findById(userRoles.get(0).getRole().getRoleId()).get();
                 if (role != null) {

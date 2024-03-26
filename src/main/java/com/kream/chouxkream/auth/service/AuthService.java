@@ -1,8 +1,18 @@
 package com.kream.chouxkream.auth.service;
 
+import com.kream.chouxkream.auth.model.dto.AuthDTO;
 import com.kream.chouxkream.auth.model.entity.RefreshToken;
 import com.kream.chouxkream.auth.repository.RefreshTokenRepository;
+import com.kream.chouxkream.role.entity.Role;
+import com.kream.chouxkream.role.repository.RoleRepository;
+import com.kream.chouxkream.user.model.dto.UserRoleKey;
+import com.kream.chouxkream.user.model.entity.User;
+import com.kream.chouxkream.user.model.entity.UserRole;
+import com.kream.chouxkream.user.repository.UserRepository;
+import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,8 +28,6 @@ public class AuthService {
     private final UserRoleRepository userRoleRepository;
     private final RoleRepository roleRepository;
 
-
-    @Override
     @Transactional
     public Long signUp(AuthDTO authDTO) throws Exception{
 
@@ -32,7 +40,7 @@ public class AuthService {
         Role role = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Default role not Found"));
 
-        UserRoleId userRoleId = new UserRoleId(user.getUserNo(), role.getRoleId());
+        UserRoleKey userRoleId = new UserRoleKey(user.getUserNo(), role.getRoleId());
         UserRole userRole = new UserRole();
         userRole.setId(userRoleId);
         userRole.setUser(user);

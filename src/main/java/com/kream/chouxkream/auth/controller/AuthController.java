@@ -1,17 +1,18 @@
 package com.kream.chouxkream.auth.controller;
 
 import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.model.dto.AuthDTO;
 import com.kream.chouxkream.auth.service.AuthService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 import static com.kream.chouxkream.auth.constants.AuthConst.*;
 
