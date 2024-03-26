@@ -13,11 +13,11 @@ import javax.validation.Valid;
 @RestController
 public class UserController {
     private final UserService userService;
-
+/*
     @PostMapping("/join")
     @ResponseStatus(HttpStatus.OK)
     public Long join(@Valid @RequestBody UserDTO userRequest) throws Exception{
         return userService.signUp(userRequest);
     }
-
+*/
 }

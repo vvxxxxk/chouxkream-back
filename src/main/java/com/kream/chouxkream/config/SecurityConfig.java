@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/user/login").permitAll() //antmatchers ->특정 리소스의 권한 설정
-                .antMatchers("/api/user/join").permitAll() //permitall -> 설정 리소스에 대한 접근을 인증없이 허용
+                .antMatchers("/api/auth/join").permitAll() //permitall -> 설정 리소스에 대한 접근을 인증없이 허용
                 .antMatchers("/api/mail/**").permitAll() // 회원가입 -> 메일 인증 관련 url
                 .antMatchers("/api/user").hasRole("USER") // user로 시작하는 모든 url은 인증후 유저레벨의 권한을 가진 사용자만 접근을 허용
                 .anyRequest().authenticated(); //모든 리소스를 의미하며 접근허용 리소스 및 인증후 특정 레벨의 권한을 가진 사용자만 접근가능한 리소스를 설정하고 그외 나머지 리소스들은 무조건 인증을 완료해야 접근이 가능

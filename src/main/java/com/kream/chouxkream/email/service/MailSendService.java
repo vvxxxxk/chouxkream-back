@@ -21,8 +21,6 @@ public class MailSendService {
     private int authNumber;
 
 
-
-    //추가 되었다.
     public boolean CheckAuthNum(String email,String authNum){
         if(redisUtil.getData(authNum)==null){
             return false;
@@ -54,7 +52,7 @@ public class MailSendService {
     @Async
     public String joinEmail(String email) {
         makeRandomNumber();
-        String setFrom = "dionisos198@naver.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String setFrom = "shhwang0930@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
         String title = "회원 가입 인증 이메일 입니다."; // 이메일 제목
         String content =

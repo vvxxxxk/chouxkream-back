@@ -13,7 +13,6 @@ import javax.persistence.Id;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Setter
 public class Role {
     @Id
     @Column(name = "role_id")
