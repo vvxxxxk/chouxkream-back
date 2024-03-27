@@ -1,12 +1,15 @@
 package com.kream.chouxkream.user.controller;
 
 import com.google.gson.JsonObject;
+import com.kream.chouxkream.common.model.entity.ResponseMessage;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -22,22 +25,29 @@ public class UserController {
     }
 
     @PostMapping("/api/login/find-email")
-    public String findEmailProcess(@RequestParam("phoneNumber") String phoneNumber) {
+    public ResponseEntity<ResponseMessage> findEmailProcess(HttpServletRequest request,
+                                                            @RequestParam("phoneNumber") String phoneNumber) {
 
         String findEmail = userService.findEmailProcess(phoneNumber);
 
-        JsonObject jsonObject = new JsonObject();
-
+        ResponseMessage responseMessage = new ResponseMessage();
         if (findEmail == null) {
-            jsonObject.addProperty("isSuccess", false);
-            jsonObject.addProperty("email", "");
-            jsonObject.addProperty("message", "회원 정보를 찾을 수 없습니다.");
+            responseMessage.setIsSuccess(false);
+            responseMessage.setStatusCode(404);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("일치하는 회원 정보를 찾을 수 없습니다.");
+            responseMessage.addData("email", null);
         } else {
-            jsonObject.addProperty("isSuccess", true);
-            jsonObject.addProperty("email", findEmail);
-            jsonObject.addProperty("message", "성공");
+            responseMessage.setIsSuccess(true);
+            responseMessage.setStatusCode(200);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("성공");
+            responseMessage.addData("email", findEmail);
         }
 
-        return jsonObject.toString();
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+
     }
 }

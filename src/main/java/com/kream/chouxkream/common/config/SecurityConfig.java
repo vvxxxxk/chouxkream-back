@@ -16,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -60,6 +61,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         // csrf 비활성화 및 cors 설정
@@ -89,11 +95,12 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/", "/all", "/redis", "/api/**", "/api/user/login", 
-                                        "/api/auth/join", "/api/mail/**", "/api/user/join").permitAll()
+                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/mail/**", "/api/user/**").permitAll()
                         .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());                  
+                        .anyRequest().authenticated())
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint());      // ToDo. 권한 없는 페이지 가면 임시로 메인 페이지로 이동하도록
 
         // 필터 등록
         http
@@ -107,6 +114,8 @@ public class SecurityConfig {
         http
                 .formLogin().disable()
                 .headers().frameOptions().disable();
+
+
 
         return http.build();
 

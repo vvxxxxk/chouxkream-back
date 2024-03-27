@@ -1,11 +1,16 @@
 package com.kream.chouxkream.auth.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
 import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
+import com.kream.chouxkream.common.model.entity.ResponseMessage;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,24 +36,54 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("JwtVerificationFilter.doFilterInternal");
         // 헤더에서 access키에 담긴 토큰을 꺼냄
         String accessToken = request.getHeader(ACCESS_TOKEN_TYPE);
 
         // 토큰이 없다면 다음 필터로 넘김
-        if (accessToken == null) {
+        if (accessToken == null ) {
             filterChain.doFilter(request, response);
             return ;
         }
+
+        ResponseMessage responseMessage = new ResponseMessage();
+        ObjectMapper objectMapper = new ObjectMapper();
+
 
         // 토큰 만료 여부 검증 (만료되어도 다음 필터로 넘기지 않음)
         try {
             jwtUtils.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
+            responseMessage.setIsSuccess(false);
+            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("access token expired");
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+
             // response body
             PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
+            writer.print(body);
+
+            // response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        } catch (MalformedJwtException e) {
+
+            responseMessage.setIsSuccess(false);
+            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("unable to parse the access token");
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+
+            // response body
+            PrintWriter writer = response.getWriter();
+            writer.print(body);
 
             // response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -59,9 +94,18 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         String tokenType = jwtUtils.getType(accessToken);
         if (!tokenType.equals(ACCESS_TOKEN_TYPE)) {
 
+            responseMessage.setIsSuccess(false);
+            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("invalid token expired");
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+
             // response body
             PrintWriter writer = response.getWriter();
-            writer.print("invalid token expired");
+            writer.print(body);
 
             // response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -98,9 +142,18 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
 
+            responseMessage.setIsSuccess(false);
+            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
+            responseMessage.setMethod(request.getMethod());
+            responseMessage.setUri(request.getRequestURI());
+            responseMessage.setMessage("invalid roleName");
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+
             // response body
             PrintWriter writer = response.getWriter();
-            writer.print("invalid role_name");
+            writer.print(body);
 
             // response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
