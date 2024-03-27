@@ -27,11 +27,6 @@ public class UserService {
 
     @Transactional
     public Long signUp(UserJoinDto userJoinDto) throws Exception {
-
-        if (userRepository.findByEmail(userJoinDto.getEmail()).isPresent()){
-            throw new Exception("이미 존재하는 이메일입니다.");
-        }
-
         User user = userRepository.save(userJoinDto.toEntity());
         user.encodePassword(passwordEncoder);
 
