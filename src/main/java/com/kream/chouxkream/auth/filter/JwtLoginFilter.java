@@ -1,9 +1,14 @@
 package com.kream.chouxkream.auth.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;
+import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +27,7 @@ import java.util.Iterator;
 
 import static com.kream.chouxkream.auth.constants.AuthConst.*;
 
+@Slf4j
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -45,13 +51,17 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         String email = obtainUsername(request);
         String password = obtainPassword(request);
 
-        System.out.println("password = " + password);
-
         // 스프링 시큐리티에서 username, password 검증하려면 token에 담아야 함
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, password, null);
 
         // 검증을 위해 token을 AuthenticationManager로 전달
-        return authenticationManager.authenticate(authToken);
+        try {
+            return authenticationManager.authenticate(authToken);
+        } catch (InternalAuthenticationServiceException e) {
+            // 내부 인증 서비스 예외 발생 처리
+            log.error("내부 인증 서비스 예외 발생: {}", e.getMessage());
+            throw new AuthenticationServiceException("Internal authentication service exception", e);
+        }
     }
 
     // 로그인 성공 - JWT token 발급
@@ -74,19 +84,50 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         // refresh token Redis 저장
         authService.saveRefreshToken(refreshToken, email);
 
-        // create cookie (access, refresh)
-        //response.addCookie(createCookie(ACCESS_TOKEN_TYPE, accessToken));
+        ResponseMessage responseMessage = new ResponseMessage();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // response
         response.setHeader("access", accessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
-        // response
+        responseMessage.setIsSuccess(true);
+        responseMessage.setStatusCode(HttpServletResponse.SC_OK);
+        responseMessage.setMethod(request.getMethod());
+        responseMessage.setUri(request.getRequestURI());
+        responseMessage.setMessage("");
+
+        // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+        String body = objectMapper.writeValueAsString(responseMessage);
+
+        // response body
+        PrintWriter writer = response.getWriter();
+        writer.print(body);
         response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
-        response.setStatus(401);
+        ResponseMessage responseMessage = new ResponseMessage();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // ToDo. 스프링 시큐리티에서 한글 깨지는 현상 원인 추정, https://green-bin.tistory.com/119
+        responseMessage.setIsSuccess(false);
+        responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
+        responseMessage.setMethod(request.getMethod());
+        responseMessage.setUri(request.getRequestURI());
+        responseMessage.setMessage("The ID is not registered or you have entered the ID or password incorrectly");
+
+        // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+        String body = objectMapper.writeValueAsString(responseMessage);
+
+        // response body
+        PrintWriter writer = response.getWriter();
+        writer.print(body);
+
+        // response status code
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     private Cookie createCookie(String key, String value) {

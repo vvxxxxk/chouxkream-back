@@ -98,7 +98,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
             responseMessage.setMethod(request.getMethod());
             responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("invalid token expired");
+            responseMessage.setMessage("invalid access token type");
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
             String body = objectMapper.writeValueAsString(responseMessage);
