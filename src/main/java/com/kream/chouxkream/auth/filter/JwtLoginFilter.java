@@ -88,7 +88,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper objectMapper = new ObjectMapper();
 
         // response
-        response.setHeader("access", accessToken);
+        response.setHeader(ACCESS_TOKEN_TYPE, accessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
         responseMessage.setIsSuccess(true);

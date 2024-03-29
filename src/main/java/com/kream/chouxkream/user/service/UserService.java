@@ -49,7 +49,7 @@ public class UserService {
     }
 
     @Transactional
-    public String findEmailProcess(String phoneNumber) {
+    public String findEmailByPhoneNumber(String phoneNumber) {
 
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
         if (optionalUser.isPresent()) {
@@ -74,5 +74,16 @@ public class UserService {
                 email.substring(pos);
 
         return maskingResult;
+    }
+
+    @Transactional
+    public User getUserInfo(String email) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        }
+
+        return null;
     }
 }
