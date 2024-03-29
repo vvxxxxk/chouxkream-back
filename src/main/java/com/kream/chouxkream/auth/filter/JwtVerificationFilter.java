@@ -45,7 +45,7 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             return ;
         }
 
-        ResponseMessage responseMessage = new ResponseMessage();
+
         ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -54,16 +54,9 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             jwtUtils.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("access token expired");
-
+            ResponseMessage responseMessage = new ResponseMessage(401, "access token expired", null);
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
             String body = objectMapper.writeValueAsString(responseMessage);
-
-            // response body
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
@@ -72,16 +65,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             return;
         } catch (MalformedJwtException e) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("unable to parse the access token");
+            ResponseMessage responseMessage = new ResponseMessage(401, "unable to parse the access token", null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
             String body = objectMapper.writeValueAsString(responseMessage);
-
-            // response body
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
@@ -94,16 +81,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         String tokenType = jwtUtils.getType(accessToken);
         if (!tokenType.equals(ACCESS_TOKEN_TYPE)) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("invalid access token type");
+            ResponseMessage responseMessage = new ResponseMessage(401, "invalid access token type", null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
             String body = objectMapper.writeValueAsString(responseMessage);
-
-            // response body
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
@@ -142,16 +123,10 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("invalid roleName");
+            ResponseMessage responseMessage = new ResponseMessage(401, "invalid role_name", null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
             String body = objectMapper.writeValueAsString(responseMessage);
-
-            // response body
             PrintWriter writer = response.getWriter();
             writer.print(body);
 

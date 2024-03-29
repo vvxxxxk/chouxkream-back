@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,20 +35,13 @@ public class UserController {
 
         String findEmail = userService.findEmailByPhoneNumber(phoneNumber);
 
-        ResponseMessage responseMessage = new ResponseMessage();
+        ResponseMessage responseMessage;
         if (findEmail == null) {
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(404);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("일치하는 회원 정보를 찾을 수 없습니다.");
-            responseMessage.addData("email", null);
+
+            responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
         } else {
-            responseMessage.setIsSuccess(true);
-            responseMessage.setStatusCode(200);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("성공");
+
+            responseMessage = new ResponseMessage(200, "", null);
             responseMessage.addData("email", findEmail);
         }
 
@@ -64,20 +58,13 @@ public class UserController {
 
         UserInfoDto userInfoDto = new UserInfoDto(user);
 
-        ResponseMessage responseMessage = new ResponseMessage();
+        ResponseMessage responseMessage;
         if (user == null) {
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(404);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("일치하는 회원 정보를 찾을 수 없습니다.");
-            responseMessage.addData("user", null);
+
+            responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
         } else {
-            responseMessage.setIsSuccess(true);
-            responseMessage.setStatusCode(200);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("");
+
+            responseMessage = new ResponseMessage(200, "", null);
             responseMessage.addData("user", userInfoDto);
         }
 

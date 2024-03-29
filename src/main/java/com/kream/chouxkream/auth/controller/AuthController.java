@@ -27,19 +27,13 @@ public class AuthController {
     @PostMapping("/jwt-reissue")
     public ResponseEntity<?> jwtReissue(HttpServletRequest request, HttpServletResponse response) {
 
-        ResponseMessage responseMessage = new ResponseMessage();
 
         // get refresh token
         String refreshToken = null;
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("refresh token is null");
-
+            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
             return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
         }
         for (Cookie cookie : cookies) {
@@ -51,12 +45,7 @@ public class AuthController {
         // refresh token null 체크
         if (refreshToken == null) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("refresh token is null");
-
+            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
             return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
         }
 
@@ -65,12 +54,7 @@ public class AuthController {
             jwtUtils.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("refresh token expired");
-
+            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token expired", null);
             return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
         }
 
@@ -78,12 +62,7 @@ public class AuthController {
         String tokenType = jwtUtils.getType(refreshToken);
         if (!tokenType.equals(REFRESH_TOKEN_TYPE)) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("invalid refresh token type");
-
+            ResponseMessage responseMessage = new ResponseMessage(400, "invalid refresh token type", null);
             return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
         }
 
@@ -91,12 +70,7 @@ public class AuthController {
         Boolean isExists = authService.isExistRefreshToken(refreshToken);
         if (!isExists) {
 
-            responseMessage.setIsSuccess(false);
-            responseMessage.setStatusCode(HttpServletResponse.SC_BAD_REQUEST);
-            responseMessage.setMethod(request.getMethod());
-            responseMessage.setUri(request.getRequestURI());
-            responseMessage.setMessage("refresh token does not exist on the server");
-
+            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token does not exist on the server", null);
             return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
         }
 
@@ -118,13 +92,7 @@ public class AuthController {
         // response
         response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, newRefreshToken));
-
-        responseMessage.setIsSuccess(true);
-        responseMessage.setStatusCode(HttpServletResponse.SC_OK);
-        responseMessage.setMethod(request.getMethod());
-        responseMessage.setUri(request.getRequestURI());
-        responseMessage.setMessage("");
-
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
         return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessage);
 
     }

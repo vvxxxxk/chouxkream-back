@@ -10,26 +10,23 @@ import java.util.Map;
 @Setter
 public class ResponseMessage {
 
-    private boolean isSuccess;
-    private int statusCode;
-    private String method;
-    private String uri;
-    private String message;
-    private Map<String, Object> data;
+    public ResponseMessage(int statusCode, String message, Map<String, Object> data) {
+        this.statusCode = statusCode;
+        this.message = message;
+        this.data = new HashMap<>();
+    }
 
     public ResponseMessage() {
         this.data = new HashMap<>();
     }
 
+    private int statusCode;
+    private String message;
+    private Map<String, Object> data;
+
+
+
     public void addData(String key, Object value) {
         data.put(key, value);
-    }
-
-    public boolean getIsSuccess() {
-        return isSuccess;
-    }
-
-    public void setIsSuccess(boolean success) {
-        isSuccess = success;
     }
 }

@@ -84,40 +84,27 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         // refresh token Redis 저장
         authService.saveRefreshToken(refreshToken, email);
 
-        ResponseMessage responseMessage = new ResponseMessage();
-        ObjectMapper objectMapper = new ObjectMapper();
-
         // response
         response.setHeader(ACCESS_TOKEN_TYPE, accessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
-        responseMessage.setIsSuccess(true);
-        responseMessage.setStatusCode(HttpServletResponse.SC_OK);
-        responseMessage.setMethod(request.getMethod());
-        responseMessage.setUri(request.getRequestURI());
-        responseMessage.setMessage("");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
         String body = objectMapper.writeValueAsString(responseMessage);
-
-        // response body
         PrintWriter writer = response.getWriter();
         writer.print(body);
+
         response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
 
-        ResponseMessage responseMessage = new ResponseMessage();
-        ObjectMapper objectMapper = new ObjectMapper();
-
         // ToDo. 스프링 시큐리티에서 한글 깨지는 현상 원인 추정, https://green-bin.tistory.com/119
-        responseMessage.setIsSuccess(false);
-        responseMessage.setStatusCode(HttpServletResponse.SC_UNAUTHORIZED);
-        responseMessage.setMethod(request.getMethod());
-        responseMessage.setUri(request.getRequestURI());
-        responseMessage.setMessage("The ID is not registered or you have entered the ID or password incorrectly");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ResponseMessage responseMessage = new ResponseMessage(401, "id is not registered or you have entered the id or password incorrectly", null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
         String body = objectMapper.writeValueAsString(responseMessage);
