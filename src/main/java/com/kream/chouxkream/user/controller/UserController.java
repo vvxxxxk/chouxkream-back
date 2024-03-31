@@ -1,7 +1,10 @@
 package com.kream.chouxkream.user.controller;
 
 import com.google.gson.JsonObject;
+import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.service.AuthService;
 import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.user.model.dto.UpdateEmailDto;
 import com.kream.chouxkream.user.model.dto.UserInfoDto;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.model.entity.User;
@@ -13,9 +16,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Map;
+
+import static com.kream.chouxkream.auth.constants.AuthConst.REFRESH_TOKEN_TYPE;
 
 @RestController
 @RequiredArgsConstructor
@@ -76,26 +83,36 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-
+    /**
+     * 회원 정보 조회
+     */
     @GetMapping("/me")
     public ResponseEntity<ResponseMessage> getUserInfo() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         User user = userService.getUserInfo(email);
-
         UserInfoDto userInfoDto = new UserInfoDto(user);
 
-        ResponseMessage responseMessage;
-        if (user == null) {
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("user", userInfoDto);
 
-            responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
-        } else {
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
 
-            responseMessage = new ResponseMessage(200, "", null);
-            responseMessage.addData("user", userInfoDto);
-        }
+    /**
+     * 이메일 변경
+     */
+    @PutMapping("/me/email")
+    public ResponseEntity<ResponseMessage> updateEmail(@Valid @RequestBody UpdateEmailDto updateEmail) {
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String originEmail = authentication.getName();
+
+        userService.updateEmail(originEmail, updateEmail.getEmail());
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("updateEmail", updateEmail.getEmail());
 
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }

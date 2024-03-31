@@ -54,6 +54,7 @@ public class UserService {
         }
 
         User user = userJoinDto.toEntity();
+        user.setActive(true);
         user.encodePassword(bCryptPasswordEncoder);
         userRepository.save(user);
 
@@ -174,9 +175,30 @@ public class UserService {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
+
             return optionalUser.get();
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
+            throw new UserServiceExeption(responseMessage);
+        }
+    }
+
+
+    @Transactional
+    public void updateEmail(String originEmail, String updateEmail) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(originEmail);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            user.setEmail(updateEmail);
+            userRepository.save(user);
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
+            throw new UserServiceExeption(responseMessage);
         }
 
-        return null;
     }
 }
