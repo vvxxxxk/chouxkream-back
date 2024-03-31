@@ -9,6 +9,7 @@ import java.util.Properties;
 
 @Configuration
 public class EmailConfig {
+
     @Bean
     public JavaMailSender mailSender() {//JAVA MAILSENDER 인터페이스를 구현한 객체를 빈으로 등록하기 위함.
 

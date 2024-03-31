@@ -24,33 +24,61 @@ public class UserController {
 
     private final UserService userService;
 
+
+    /**
+     * 회원가입
+     */
     @PostMapping("/join")
-    @ResponseStatus(HttpStatus.OK)
-    public Long join(@Valid @RequestBody UserJoinDto userJoinDto) throws Exception {
-        return userService.signUp(userJoinDto);
+    public ResponseEntity<ResponseMessage> join(@Valid @RequestBody UserJoinDto userJoinDto) {
+
+        userService.join(userJoinDto);
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
+    /**
+     * 인증 메일 발송
+     */
+    @PostMapping("/auth-email")
+    public ResponseEntity<ResponseMessage> sendAuthEmail(@RequestParam("email") String email) {
+
+        userService.sendAuthEmail(email);
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
+
+    /**
+     * 인증 번호 체크
+     */
+    @PostMapping("/auth-number")
+    public ResponseEntity<ResponseMessage> checkAuthNumber(@RequestParam("email") String email,
+                                                           @RequestParam("authNumber") String authNumber) {
+
+        Boolean isCheck = userService.checkAuthNumber(email, authNumber);
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
+
+    /**
+     * 이메일 찾기
+     */
     @GetMapping("/email")
-    public ResponseEntity<ResponseMessage> findEmailByPhoneNumber(HttpServletRequest request, @RequestParam("phoneNumber") String phoneNumber) {
+    public ResponseEntity<ResponseMessage> findEmailByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
 
         String findEmail = userService.findEmailByPhoneNumber(phoneNumber);
 
-        ResponseMessage responseMessage;
-        if (findEmail == null) {
-
-            responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
-        } else {
-
-            responseMessage = new ResponseMessage(200, "", null);
-            responseMessage.addData("email", findEmail);
-        }
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("email", findEmail);
 
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseMessage> getUserInfo(HttpServletRequest request) {
+    public ResponseEntity<ResponseMessage> getUserInfo() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

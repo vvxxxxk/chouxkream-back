@@ -1,6 +1,7 @@
 package com.kream.chouxkream.common.controller;
 
 import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.user.exception.UserServiceExeption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -28,11 +29,21 @@ public class ErrorHandleController {
         return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @ExceptionHandler(UserServiceExeption.class)
+    public ResponseEntity<ResponseMessage> UserServiceExceptionMethod(UserServiceExeption e) {
+
+        log.error(e.getMessage());
+        e.printStackTrace();
+
+        return ResponseEntity.status(400).body(e.getResponseMessage());
+    }
+
 
     //email 중복에 대한 오류
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> emailDuplicationExceptionMethod(DataIntegrityViolationException e) {
+
         Map<String, Object> response = new HashMap<>();
         response.put("is_success", false);
         response.put("error", "중복된 이메일 입니다.");
