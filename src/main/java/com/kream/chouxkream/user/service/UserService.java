@@ -186,9 +186,9 @@ public class UserService {
 
 
     @Transactional
-    public void updateEmail(String originEmail, String updateEmail) {
+    public void updateEmail(String email, String updateEmail) {
 
-        Optional<User> optionalUser = userRepository.findByEmail(originEmail);
+        Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
 
             User user = optionalUser.get();
@@ -199,6 +199,53 @@ public class UserService {
             ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
             throw new UserServiceExeption(responseMessage);
         }
+    }
 
+    @Transactional
+    public void updateName(String email, String updateName) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            user.setUsername(updateName);
+            userRepository.save(user);
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
+            throw new UserServiceExeption(responseMessage);
+        }
+    }
+
+    @Transactional
+    public void updateNickname(String email, String updateNickname) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            user.setNickname(updateNickname);
+            userRepository.save(user);
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
+            throw new UserServiceExeption(responseMessage);
+        }
+    }
+
+    @Transactional
+    public void updateUserDesc(String email, String updateUserDesc) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            user.setUserDesc(updateUserDesc);
+            userRepository.save(user);
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(404, "일치하는 회원 정보를 찾을 수 없습니다.", null);
+            throw new UserServiceExeption(responseMessage);
+        }
     }
 }

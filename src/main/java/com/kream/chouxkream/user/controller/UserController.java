@@ -4,9 +4,7 @@ import com.google.gson.JsonObject;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;
 import com.kream.chouxkream.common.model.entity.ResponseMessage;
-import com.kream.chouxkream.user.model.dto.UpdateEmailDto;
-import com.kream.chouxkream.user.model.dto.UserInfoDto;
-import com.kream.chouxkream.user.model.dto.UserJoinDto;
+import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -104,15 +102,66 @@ public class UserController {
      * 이메일 변경
      */
     @PutMapping("/me/email")
-    public ResponseEntity<ResponseMessage> updateEmail(@Valid @RequestBody UpdateEmailDto updateEmail) {
+    public ResponseEntity<ResponseMessage> updateEmail(@Valid @RequestBody UpdateEmailDto updateEmailDto) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String originEmail = authentication.getName();
+        String email = authentication.getName();
 
-        userService.updateEmail(originEmail, updateEmail.getEmail());
+        userService.updateEmail(email, updateEmailDto.getEmail());
 
         ResponseMessage responseMessage = new ResponseMessage(200, "", null);
-        responseMessage.addData("updateEmail", updateEmail.getEmail());
+        responseMessage.addData("updateEmail", updateEmailDto.getEmail());
+
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
+
+    /**
+     * 이름 변경
+     */
+    @PutMapping("/me/name")
+    public ResponseEntity<ResponseMessage> updateName(@Valid @RequestBody UpdateNameDto updateNameDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        userService.updateName(email, updateNameDto.getUsername());
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("updateName", updateNameDto.getUsername());
+
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
+
+    /**
+     * 닉네임 변경
+     */
+    @PutMapping("/me/nickname")
+    public ResponseEntity<ResponseMessage> updateNickname(@Valid @RequestBody UpdateNicknameDto updateNicknameDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        userService.updateNickname(email, updateNicknameDto.getNickname());
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("updateNickname", updateNicknameDto.getNickname());
+
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
+
+    /**
+     * 소개글 변경
+     */
+    @PutMapping("/me/user-desc")
+    public ResponseEntity<ResponseMessage> updateUserDesc(@Valid @RequestBody UpdateUserDescDto updateUserDescDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        userService.updateUserDesc(email, updateUserDescDto.getUserDesc());
+
+        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        responseMessage.addData("updateUserDesc", updateUserDescDto.getUserDesc());
 
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
