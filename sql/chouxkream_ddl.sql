@@ -95,13 +95,12 @@ create TABLE IF NOT EXISTS `product` (
 	`product_sub_title` varchar(200) not null,
 	`model_id` varchar(50),
 	`brand_id` varchar(100),
+	`category_no` bigint,
 	`product_color` varchar(100) null,
 	`release_price` bigint,
 	`release_date` date,
 	`create_date` datetime not null default current_timestamp,
-	`update_date` datetime not null default current_timestamp on
-update
-	current_timestamp,
+	`update_date` datetime not null default current_timestamp on update current_timestamp,
 	`views_count` bigint not null default 0,
 	`meta_keyword` varchar(1000) null,
 	`is_active` bit not null default 0,
@@ -109,12 +108,12 @@ update
 ) engine = innodb;
 
 create TABLE IF NOT EXISTS `product_size` (
+	`product_size_no` bigint auto_increment not null,
 	`product_no` bigint not null,
 	`size_name` varchar(10) not null,
 	`stock` bigint not null default 0,
 	`sell_count` bigint not null default 0,
-    primary key(`product_no`,
-`size_name`)
+    primary key(`product_size_no`)
 ) engine = innodb;
 
 create TABLE IF NOT EXISTS `brand` (
@@ -124,9 +123,7 @@ create TABLE IF NOT EXISTS `brand` (
 	`brand_logo_url` varchar(2000) null,
 	`is_active` bit not null default 0,
 	`create_date` datetime not null default current_timestamp,
-	`update_date` datetime not null default current_timestamp on
-update
-	current_timestamp,
+	`update_date` datetime not null default current_timestamp on update current_timestamp,
 	primary key(`brand_id`)
 ) engine = innodb;
 
@@ -134,9 +131,7 @@ create TABLE IF NOT EXISTS `category` (
 	`category_no` bigint auto_increment not null,
 	`category_name` varchar(100) not null,
 	`create_date` datetime not null default current_timestamp,
-	`update_date` datetime not null default current_timestamp on
-update
-	current_timestamp,
+	`update_date` datetime not null default current_timestamp on update current_timestamp, 
 	primary key(category_no)
 ) engine = innodb;
 
@@ -154,14 +149,10 @@ create TABLE IF NOT EXISTS `bid` (
 	`bid_no` bigint auto_increment not null,
 	`user_no` bigint not null,
 	`product_size_no` bigint not null,
-    `product_no` bigint not null,
-	`bid_type` enum('sell',
-'buy') not null,
+	`bid_type` enum('sell','buy') not null,
 	`bid_price` int not null,
 	`create_date` timestamp not null default current_timestamp,
-	`bid_status` enum('bid_progress',
-'bid_cancel',
-'bid_complete') not null default 'bid_progress',
+	`bid_status` enum('bid_progress', 'bid_cancel', 'bid_complete') not null default 'bid_progress',
     primary key(bid_no)
 ) engine = innodb;
 
@@ -185,40 +176,45 @@ create TABLE IF NOT EXISTS `payment` (
 -- ###############################################################################
 
 alter table `user_role` add constraint `FK_user_TO_user_role_1` foreign key (`user_no`)
-references `user` (`user_no`) on
-delete
-	cascade;
+references `user` (`user_no`) on delete cascade;
 
 alter table `user_role` add constraint `FK_role_TO_user_role_1` foreign key (`role_id`)
 references `role` (`role_id`);
 
+alter table `address` add constraint `FK_user_TO_address_1` foreign key (`user_no`)
+references `user` (`user_no`) on delete cascade;
+
 alter table `user_coupon` add constraint `FK_user_TO_user_coupon_1` foreign key (`user_no`)
-references `user` (`user_no`) on
-delete
-	cascade;
+references `user` (`user_no`) on delete cascade;
 
 alter table `user_coupon` add constraint `FK_coupon_TO_user_coupon_1` foreign key (`coupon_no`)
-references `coupon` (`coupon_no`) on
-delete
-	cascade;
+references `coupon` (`coupon_no`) on delete cascade;
 
 alter table `product` add constraint `FK_product_TO_brand_1` foreign key (`brand_id`)
-references `brand` (`brand_id`) on
-delete
-	set
-	null;
-
-alter table `product_category` add constraint `FK_product_TO_category_1` foreign key (`product_no`)
-references `product` (`product_no`) on
-delete
-	cascade;
-
-alter table `product_category` add constraint `FK_product_TO_category_2` foreign key (`category_no`)
-references `category` (`category_no`) on
-delete
-	cascade;
+references `brand` (`brand_id`) on delete set null;
 
 alter table `product_images` add constraint `FK_product_TO_images_2` foreign key (`product_no`)
-references `product` (`product_no`) on
-delete
-	cascade;
+references `product` (`product_no`) on delete cascade;
+
+alter table `product` add constraint `FK_product_TO_category_1` foreign key (`category_no`)
+references `category` (`category_no`) on delete set null;
+
+alter table `product_size` add constraint `FK_product_TO_size_1` foreign key (`product_no`)
+references `product` (`product_no`) on delete cascade;
+
+alter table `wishlist` add constraint `FK_user_TO_wishlist_1` foreign key (`user_no`)
+references `user` (`user_no`) on delete cascade;
+
+alter table `wishlist` add constraint `FK_product_size_TO_wishlist_1` foreign key (`product_size_no`)
+references `product_size` (`product_size_no`) on delete cascade;
+
+alter table `bid` add constraint `FK_user_TO_bid_1` foreign key (`user_no`)
+references `user` (`user_no`) on delete cascade;
+
+alter table `bid` add constraint `FK_product_size_TO_bid_1` foreign key (`product_size_no`)
+references `product_size` (`product_size_no`) on delete cascade;
+
+alter table `payment` add constraint `FK_bid_TO_payment_1` foreign key (`bid_no`)
+references `bid` (`bid_no`) on delete cascade;
+
+-- ###############################################################################
