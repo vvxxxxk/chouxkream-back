@@ -95,7 +95,8 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/mail/**", "/api/user/**").permitAll()
+                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/users/**").permitAll()
+                        .antMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
                         .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())

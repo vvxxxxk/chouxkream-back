@@ -7,6 +7,7 @@ import com.kream.chouxkream.common.model.entity.ResponseMessage;
 import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.service.UserService;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +30,7 @@ public class UserController {
 
     private final UserService userService;
 
-
-    /**
-     * 회원가입
-     */
+    @ApiOperation(value = "회원가입")
     @PostMapping("/join")
     public ResponseEntity<ResponseMessage> join(@Valid @RequestBody UserJoinDto userJoinDto) {
 
@@ -42,9 +40,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 인증 메일 발송
-     */
+    @ApiOperation(value = "인증 메일 발송")
     @PostMapping("/auth-email")
     public ResponseEntity<ResponseMessage> sendAuthEmail(@RequestParam("email") String email) {
 
@@ -54,9 +50,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 인증 번호 체크
-     */
+    @ApiOperation(value = "인증 번호 체크")
     @PostMapping("/auth-number")
     public ResponseEntity<ResponseMessage> checkAuthNumber(@RequestParam("email") String email,
                                                            @RequestParam("authNumber") String authNumber) {
@@ -67,9 +61,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 이메일 찾기
-     */
+    @ApiOperation(value = "이메일 찾기")
     @GetMapping("/email")
     public ResponseEntity<ResponseMessage> findEmailByPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
 
@@ -81,9 +73,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 회원 정보 조회
-     */
+    @ApiOperation(value = "회원 정보 조회")
     @GetMapping("/me")
     public ResponseEntity<ResponseMessage> getUserInfo() {
 
@@ -98,9 +88,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 이메일 변경
-     */
+    @ApiOperation(value = "이메일 변경")
     @PutMapping("/me/email")
     public ResponseEntity<ResponseMessage> updateEmail(@Valid @RequestBody UpdateEmailDto updateEmailDto) {
 
@@ -115,9 +103,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 이름 변경
-     */
+    @ApiOperation(value = "이름 변경")
     @PutMapping("/me/name")
     public ResponseEntity<ResponseMessage> updateName(@Valid @RequestBody UpdateNameDto updateNameDto) {
 
@@ -132,9 +118,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 닉네임 변경
-     */
+    @ApiOperation(value = "닉네임 변경")
     @PutMapping("/me/nickname")
     public ResponseEntity<ResponseMessage> updateNickname(@Valid @RequestBody UpdateNicknameDto updateNicknameDto) {
 
@@ -149,9 +133,7 @@ public class UserController {
         return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 
-    /**
-     * 소개글 변경
-     */
+    @ApiOperation(value = "소개글 변경")
     @PutMapping("/me/user-desc")
     public ResponseEntity<ResponseMessage> updateUserDesc(@Valid @RequestBody UpdateUserDescDto updateUserDescDto) {
 
