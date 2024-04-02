@@ -47,6 +47,9 @@ dependencies {
 	// Spring Context Support
 	implementation 'org.springframework:spring-context-support:5.3.9'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
+	// Swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 }
 
 tasks.named('test') {
