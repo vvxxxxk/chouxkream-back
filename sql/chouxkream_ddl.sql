@@ -1,11 +1,23 @@
 - 임시 데이터베이스 생성
 create database test3;
 
-use test3;
+
+-- use test3;
 -- 임시 데이터베이스 삭제
 -- drop database test3;
 -- 테이블 생성
-create table `user` (
+
+-- ###############################################################################
+-- DROP TABLE
+-- ###############################################################################
+-- DROP TABLE IF EXISTS `user`;
+
+
+-- ###############################################################################
+-- TABLE 생성
+-- ###############################################################################
+
+create TABLE IF NOT EXISTS `user` (
 	`user_no` bigint auto_increment not null,
 	`email` varchar(50) not null unique,
 	`password` varchar(255) not null,
@@ -22,20 +34,20 @@ update
 	primary key(user_no)
 ) engine = innodb;
 
-create table `role` (
+create TABLE IF NOT EXISTS `role` (
 	`role_id` char(5) not null,
 	`role_name` varchar(20) not null,
    primary key(role_id)
 ) engine = innodb;
 
-create table `user_role` (
+create TABLE IF NOT EXISTS `user_role` (
 	`user_no` bigint not null,
 	`role_id` char(5) not null,
    primary key(user_no,
 role_id)
 ) engine = innodb;
 
-create table `address` (
+create TABLE IF NOT EXISTS `address` (
 	`address_no` bigint auto_increment not null,
 	`user_no` bigint not null,
 	`receiver_name` varchar(10) not null,
@@ -47,7 +59,7 @@ create table `address` (
     primary key(address_no)
 ) engine = innodb;
 
-create table `coupon` (
+create TABLE IF NOT EXISTS `coupon` (
 	`coupon_no` bigint auto_increment not null,
 	`coupon_name` varchar(100) not null,
 	`coupon_desc` varchar(255) not null,
@@ -59,7 +71,7 @@ create table `coupon` (
     primary key(coupon_no)
 ) engine = innodb;
 
-create table `user_coupon` (
+create TABLE IF NOT EXISTS `user_coupon` (
 	`user_no` bigint not null,
 	`coupon_no` bigint not null,
 	`issue_date` timestamp not null default current_timestamp,
@@ -69,7 +81,7 @@ create table `user_coupon` (
 coupon_no)
 ) engine = innodb;
 
-create table `wishlist` (
+create TABLE IF NOT EXISTS `wishlist` (
 	`wishlist_no` bigint auto_increment not null,
 	`user_no` bigint not null,
 	`product_size_no` bigint not null,
@@ -77,7 +89,7 @@ create table `wishlist` (
 	primary key(wishlist_no)
 ) engine = innodb;
 
-create table `product` (
+create TABLE IF NOT EXISTS `product` (
 	`product_no` bigint auto_increment not null,
 	`product_title` varchar(200) not null,
 	`product_sub_title` varchar(200) not null,
@@ -96,7 +108,7 @@ update
 	primary key(product_no)
 ) engine = innodb;
 
-create table `product_size` (
+create TABLE IF NOT EXISTS `product_size` (
 	`product_no` bigint not null,
 	`size_name` varchar(10) not null,
 	`stock` bigint not null default 0,
@@ -105,7 +117,7 @@ create table `product_size` (
 `size_name`)
 ) engine = innodb;
 
-create table `brand` (
+create TABLE IF NOT EXISTS `brand` (
 	`brand_id` varchar(100) not null,
 	`brand_name` varchar(100) not null,
 	`brand_sub_name` varchar(100) not null,
@@ -118,7 +130,7 @@ update
 	primary key(`brand_id`)
 ) engine = innodb;
 
-create table `category` (
+create TABLE IF NOT EXISTS `category` (
 	`category_no` bigint auto_increment not null,
 	`category_name` varchar(100) not null,
 	`create_date` datetime not null default current_timestamp,
@@ -128,14 +140,8 @@ update
 	primary key(category_no)
 ) engine = innodb;
 
-create table `product_category` (
-	`product_no` bigint not null,
-	`category_no` bigint not null,
-	primary key(`product_no`,
-`category_no`)
-)
 
-create table `product_images` (
+create TABLE IF NOT EXISTS `product_images` (
 	`image_no` bigint auto_increment not null,
 	`product_no` bigint not null,
 	`image_url` varchar(2000) null,
@@ -144,7 +150,7 @@ create table `product_images` (
    primary key(image_no)
 ) engine = innodb;
 
-create table `bid` (
+create TABLE IF NOT EXISTS `bid` (
 	`bid_no` bigint auto_increment not null,
 	`user_no` bigint not null,
 	`product_size_no` bigint not null,
@@ -159,7 +165,7 @@ create table `bid` (
     primary key(bid_no)
 ) engine = innodb;
 
-create table `payment` (
+create TABLE IF NOT EXISTS `payment` (
 	`payment_no` bigint auto_increment not null,
 	`bid_no` bigint not null,
 	`payment_method` enum('mobile_payment',
@@ -172,7 +178,12 @@ create table `payment` (
 'payment_complete') not null default 'payment_progress',
     primary key(payment_no)
 ) engine = innodb;
+
+
+-- ###############################################################################
 -- 제약조건 추가
+-- ###############################################################################
+
 alter table `user_role` add constraint `FK_user_TO_user_role_1` foreign key (`user_no`)
 references `user` (`user_no`) on
 delete
