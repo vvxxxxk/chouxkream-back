@@ -5,6 +5,7 @@ import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.List;
 
 @Data
 @Getter
@@ -15,11 +16,11 @@ public class SearchDTO {
     //like문으로 처리
     private String keyword;
 
-    private int categoryId;
+    private List<Integer> category;
 
-    private String color;
+    private List<String> color;
 
-    private String brand;
+    private List<String> brand;
 
     private String sort;
 }

@@ -9,28 +9,28 @@ import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
-    private final ProductRepository productRepository;
 
 
     @GetMapping("/api/search")
-    public List<Product> search(@RequestBody SearchDTO searchDTO){
-        Specification<Product> spec = (root, query, criteriaBuilder) -> null;
-        if (searchDTO.getKeyword() != null)
-            spec = spec.and(ProductSpecification.likeKeyword(searchDTO.getKeyword()));
+    public Map<String,Object> search(@RequestBody SearchDTO searchDTO){
+        Map<String, Object> result = new HashMap<>();
+        result.put("is_success", true);
+        result.put("data", productService.search(searchDTO));
+        return result;
+    }
 
-        List<Product> list = productRepository.findAll(spec);
-        return list;
+    @GetMapping("/api/search/rank")
+    public List<String> searchRankList(){
+        return productService.getPopularSearches();
     }
 }

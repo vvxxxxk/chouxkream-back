@@ -1,5 +1,7 @@
 package com.kream.chouxkream.product.model.entity;
 
+import com.kream.chouxkream.brand.model.entity.Brand;
+import com.kream.chouxkream.category.model.entity.Category;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
@@ -12,7 +14,6 @@ import java.sql.Timestamp;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @DynamicInsert
 public class Product {
     @Id
@@ -32,7 +33,7 @@ public class Product {
     private String color;
 
     @Column(nullable = true)
-    private int releasePrice;
+    private Integer releasePrice;
 
     @Column(nullable = true)
     private Timestamp releaseDate;
@@ -52,4 +53,11 @@ public class Product {
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean isActive;
 
+    @OneToOne
+    @JoinColumn(name="brand_id")
+    private Brand brand;
+
+    @OneToOne
+    @JoinColumn(name="category_no")
+    private Category category;
 }

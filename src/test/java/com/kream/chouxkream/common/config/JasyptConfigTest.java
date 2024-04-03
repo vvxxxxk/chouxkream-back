@@ -5,14 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class JasyptConfigTest {
+class JasyptConfigTest extends JasyptConfig{
 
     @Test
-    public void stringEncryptor() {
+    public void jasypt_encrypt_decrypt_test() {
 
         String encrptKey = System.getProperty("jasypt.encryptor.password");
-        // String plainText = "jdbc:mysql://localhost:3306/chouxkream_db?UTC&characterEncoding=UTF-8";
-        String plainText = "3hQWN6zPEf";
+        String plainText = "";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encrptKey);

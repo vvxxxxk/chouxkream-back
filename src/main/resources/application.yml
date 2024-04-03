@@ -1,14 +1,14 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ENC(YiBT9wshgO0orwLbyOnH/+r2pq7jogZOehgrprlWkNbe3l/hmiIqWqj50QkPSSHE)
-    username: ENC(+rzyNEuL8hk5/1Sos4TfHg==)
-    password: ENC(01n7L6C8DoscJzluIfzdPg==)
+    url: ENC(ZeayKQ67Q/vpR8uZB6W6N9bUFWTtxoEc3kvmJZxAxqbBny1q7Yck7SMpBnMLHJpKOh8p4rqnpFY=)
+    username: ENC(aiH8hrw9E+ErSwLkRn3Kag==)
+    password: ENC(E1Hv9nlSKmckP9SvajbWcw==)
   mail:
     host: smtp.gmail.com
     port: 587
-    username: shhwang0930@gmail.com
-    password: zowufvotifzjosnn
+    username: ENC(SmDvKpBjBBcPYbsJarsAkudMLpQcmuYq/Y4AkYvsbvg=)
+    password: ENC(VGBLY+EdcKIj60bBvIN8rEmwUjJFl2XljFsxGrpDEhU=)
     properties:
       mail:
         smtp:
