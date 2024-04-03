@@ -3,7 +3,8 @@ package com.kream.chouxkream.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;
-import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
+import com.kream.chouxkream.common.model.dto.StatusCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -55,15 +56,16 @@ public class JwtLogoutFilter extends GenericFilterBean {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
         for (Cookie cookie : cookies) {
@@ -75,15 +77,16 @@ public class JwtLogoutFilter extends GenericFilterBean {
         // refresh token null 체크
         if (refreshToken == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -92,15 +95,16 @@ public class JwtLogoutFilter extends GenericFilterBean {
             jwtUtils.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token expired", null);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_EXPIRED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -108,15 +112,16 @@ public class JwtLogoutFilter extends GenericFilterBean {
         String tokenType = jwtUtils.getType(refreshToken);
         if (!tokenType.equals(REFRESH_TOKEN_TYPE)) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "invalid refresh token type", null);
+            StatusCode statusCode = StatusCode.INVALID_JWT_TOKEN;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -124,15 +129,16 @@ public class JwtLogoutFilter extends GenericFilterBean {
         Boolean isExists = jwtService.isExistRefreshToken(refreshToken);
         if (!isExists) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token does not exist on the server", null);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -147,10 +153,11 @@ public class JwtLogoutFilter extends GenericFilterBean {
 
         response.addCookie(cookie);
 
-        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        StatusCode statusCode = StatusCode.LOGOUT_SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-        String body = objectMapper.writeValueAsString(responseMessage);
+        String body = objectMapper.writeValueAsString(responseMessageDto);
         PrintWriter writer = response.getWriter();
         writer.print(body);
 

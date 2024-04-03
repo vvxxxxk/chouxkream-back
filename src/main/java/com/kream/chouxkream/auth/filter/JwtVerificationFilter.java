@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
 import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
-import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
+import com.kream.chouxkream.common.model.dto.StatusCode;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -54,26 +54,29 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             jwtUtils.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
-            ResponseMessage responseMessage = new ResponseMessage(401, "access token expired", null);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_EXPIRED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         } catch (MalformedJwtException e) {
 
-            ResponseMessage responseMessage = new ResponseMessage(401, "unable to parse the access token", null);
+            StatusCode statusCode = StatusCode.INVALID_JWT_TOKEN;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -81,15 +84,16 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         String tokenType = jwtUtils.getType(accessToken);
         if (!tokenType.equals(ACCESS_TOKEN_TYPE)) {
 
-            ResponseMessage responseMessage = new ResponseMessage(401, "invalid access token type", null);
+            StatusCode statusCode = StatusCode.INVALID_JWT_TOKEN;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
@@ -123,15 +127,16 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else {
 
-            ResponseMessage responseMessage = new ResponseMessage(401, "invalid role_name", null);
+            StatusCode statusCode = StatusCode.PERMISSION_DENIED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
             // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-            String body = objectMapper.writeValueAsString(responseMessage);
+            String body = objectMapper.writeValueAsString(responseMessageDto);
             PrintWriter writer = response.getWriter();
             writer.print(body);
 
             // response status code
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
     }

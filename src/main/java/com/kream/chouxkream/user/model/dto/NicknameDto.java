@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-public class UpdateNicknameDto {
+public class NicknameDto {
 
     @Size(min=1, max=50, message = "이름은 50글자 이하로 지어야 합니다.")
     private String nickname;
