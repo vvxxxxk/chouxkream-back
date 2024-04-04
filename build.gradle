@@ -7,6 +7,10 @@ plugins {
 group = 'com.kream'
 version = '0.0.1-SNAPSHOT'
 
+jar {
+	enabled = false // Disable the default JAR task # plain JAR 제외
+}
+
 java {
 	sourceCompatibility = '17'
 }
