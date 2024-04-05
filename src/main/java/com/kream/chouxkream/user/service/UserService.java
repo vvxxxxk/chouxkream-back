@@ -1,10 +1,7 @@
 package com.kream.chouxkream.user.service;
 
-import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
-import com.kream.chouxkream.common.model.dto.StatusCode;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.repository.RoleRepository;
-import com.kream.chouxkream.user.exception.UserServiceExeption;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.model.dto.UserRoleKey;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
@@ -14,16 +11,15 @@ import com.kream.chouxkream.user.repository.AuthNumberRepositroy;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.Random;
 
@@ -70,14 +66,12 @@ public class UserService {
     // @Async
     public void sendAuthEmail(String email) throws MessagingException {
 
-        ResponseMessageDto responseMessageDto;
-
         String authNum = makeAuthNumber();
         String setFrom = "shhwang0930@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
-        String title = "회원가입 인증 이메일";
+        String title = "[CHOUXKREAM]회원가입 인증 이메일";
         String content =
-                "나의 APP을 방문해주셔서 감사합니다." +
+                "CHOUXKREAM을 방문해주셔서 감사합니다." +
                 "<br><br>" +
                 "인증 번호는 " + authNum + "입니다." +
                 "<br>" +
@@ -181,5 +175,70 @@ public class UserService {
             user.setUserDesc(updateUserDesc);
             userRepository.save(user);
         }
+    }
+
+    @Transactional
+    public void sendTempPasswordEmail(String email) throws MessagingException {
+
+        String tempPassword = generateTempPassword();
+        String setFrom = "shhwang0930@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = email;
+        String title = "[CHOUXKREAM]임시 비밀번호 발급 이메일";
+        String content =
+                "임시 발급된 패스워드 입니다. " +
+                        "<br><br>" +
+                        "인증 번호는 " + tempPassword + "입니다." +
+                        "<br>" +
+                        "인증번호를 제대로 입력해주세요";
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message,true,"utf-8");//이메일 메시지와 관련된 설정을 수행합니다.
+        // true를 전달하여 multipart 형식의 메시지를 지원하고, "utf-8"을 전달하여 문자 인코딩을 설정
+        helper.setFrom(setFrom);//이메일의 발신자 주소 설정
+        helper.setTo(toMail);//이메일의 수신자 주소 설정
+        helper.setSubject(title);//이메일의 제목을 설정
+        helper.setText(content,true);//이메일의 내용 설정 두 번째 매개 변수에 true를 설정하여 html 설정으로한다.
+        mailSender.send(message);
+
+        User user = userRepository.findByEmail(email).get();
+        user.setPassword(tempPassword);
+        user.encodePassword(bCryptPasswordEncoder);
+        System.out.println("tempPassword = " + tempPassword);
+
+        userRepository.save(user);
+    }
+
+    public String generateTempPassword() {
+
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = upper.toLowerCase();
+        String digits = "0123456789";
+        String special_chars = "@$!%*#?&";
+        String all_chars = upper + lower + digits + special_chars;
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+
+        // 최소 8자 이상, 최대 16자 이하의 임시 비밀번호 생성
+        int length = random.nextInt(9) + 8;
+
+        // 적어도 하나의 영문자, 숫자, 특수문자 를 추가
+        password.append(upper.charAt(random.nextInt(upper.length())));
+        password.append(digits.charAt(random.nextInt(digits.length())));
+        password.append(special_chars.charAt(random.nextInt(special_chars.length())));
+        // 나머지 문자 추가
+        for (int i = 0; i < length - 3; i++) {
+            password.append(all_chars.charAt(random.nextInt(all_chars.length())));
+        }
+
+        // 임시 비밀번호를 무작위로 섞음
+        for (int i = 0; i < length; i++) {
+            int randomIndex = random.nextInt(length);
+            char temp = password.charAt(i);
+            password.setCharAt(i, password.charAt(randomIndex));
+            password.setCharAt(randomIndex, temp);
+        }
+
+        return password.toString();
     }
 }

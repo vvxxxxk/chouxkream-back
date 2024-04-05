@@ -248,4 +248,35 @@ public class UserController {
         responseMessageDto.addData("updateUserDesc", updateUserDesc);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
+
+    @ApiOperation(value = "비밀번호 찾기")
+    @PostMapping("/password")
+    public ResponseEntity<ResponseMessageDto> findPassword(@Valid @RequestBody PhoneNumberAndEmailDto phoneNumberAndEmailDto) throws MessagingException {
+
+        String email = phoneNumberAndEmailDto.getEmail();
+        String phoneNumber = phoneNumberAndEmailDto.getPhoneNumber();
+
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+        // 사용자 정보와 입력한 연락처 비교
+        if (!optionalUser.get().getPhoneNumber().equals(phoneNumber)) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        // 임시 비밀번호 발급
+        userService.sendTempPasswordEmail(email);
+
+        StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
 }
