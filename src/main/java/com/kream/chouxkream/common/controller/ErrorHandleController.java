@@ -1,8 +1,6 @@
 package com.kream.chouxkream.common.controller;
 
 import com.kream.chouxkream.common.model.dto.ErrorMessageDto;
-import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
-import com.kream.chouxkream.user.exception.UserServiceExeption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.annotation.PostConstruct;
@@ -35,8 +32,6 @@ public class ErrorHandleController {
     public void init() {
         headers.setContentType(MediaType.APPLICATION_JSON);
     }
-
-
 
     // ########################################################################
     // # 4xx

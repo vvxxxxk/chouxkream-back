@@ -57,7 +57,7 @@ public class UserController {
     @PostMapping("/auth-email")
     public ResponseEntity<ResponseMessageDto> sendAuthEmail(@Valid @RequestBody EmailDto emailDto) throws MessagingException {
 
-
+        // Async 메서드
         userService.sendAuthEmail(emailDto.getEmail());
 
         StatusCode statusCode = StatusCode.AUTH_EMAIL_SEND_SUCCESS;
@@ -274,6 +274,53 @@ public class UserController {
 
         // 임시 비밀번호 발급
         userService.sendTempPasswordEmail(email);
+
+        StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation(value = "비밀번호 확인")
+    @GetMapping("/me/password")
+    public ResponseEntity<ResponseMessageDto> checkPassword(@Valid @RequestBody PasswordDto passwordDto) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        String password = passwordDto.getPassword();
+        boolean isCheckPassword = userService.isPasswordCheck(email, password);
+
+        if (!isCheckPassword) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation(value = "비밀번호 변경")
+    @PostMapping("/me/password")
+    public ResponseEntity<ResponseMessageDto> updatePassword(@Valid @RequestBody PasswordDto updatePasswordDto) {
+
+        // **
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 사용자 검증
+        boolean isExistEmail = userService.isEmailExists(email);
+        if (!isExistEmail) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        String updatePassword = updatePasswordDto.getPassword();
+        userService.updatePassword(email, updatePassword);
 
         StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);

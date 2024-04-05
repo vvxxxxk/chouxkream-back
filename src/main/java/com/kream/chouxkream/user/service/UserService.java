@@ -13,6 +13,7 @@ import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,7 +64,7 @@ public class UserService {
         userRoleRepository.save(userRole);
     }
 
-    // @Async
+    @Async
     public void sendAuthEmail(String email) throws MessagingException {
 
         String authNum = makeAuthNumber();
@@ -80,12 +81,11 @@ public class UserService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message,true,"utf-8");//이메일 메시지와 관련된 설정을 수행합니다.
         // true를 전달하여 multipart 형식의 메시지를 지원하고, "utf-8"을 전달하여 문자 인코딩을 설정
-        helper.setFrom(setFrom);//이메일의 발신자 주소 설정
-        helper.setTo(toMail);//이메일의 수신자 주소 설정
-        helper.setSubject(title);//이메일의 제목을 설정
+        helper.setFrom(setFrom);    //이메일의 발신자 주소 설정
+        helper.setTo(toMail);       //이메일의 수신자 주소 설정
+        helper.setSubject(title);   //이메일의 제목을 설정
         helper.setText(content,true);//이메일의 내용 설정 두 번째 매개 변수에 true를 설정하여 html 설정으로한다.
         mailSender.send(message);
-
 
         AuthNumber authNumber = new AuthNumber(email, authNum);
         authNumberRepositroy.save(authNumber);
@@ -241,4 +241,33 @@ public class UserService {
 
         return password.toString();
     }
+
+    @Transactional
+    public boolean isPasswordCheck(String email, String password) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return false;
+        }
+
+        User user = optionalUser.get();
+        if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional
+    public void updatePassword(String email, String updatePassword) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            User user = optionalUser.get();
+            user.setPassword(updatePassword);
+            user.encodePassword(bCryptPasswordEncoder);
+            userRepository.save(user);
+        }
+    }
+
 }
