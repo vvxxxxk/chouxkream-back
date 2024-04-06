@@ -3,7 +3,8 @@ package com.kream.chouxkream.auth.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;
-import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
+import com.kream.chouxkream.common.model.dto.StatusCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -89,10 +90,11 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
+        StatusCode statusCode = StatusCode.LOGIN_SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-        String body = objectMapper.writeValueAsString(responseMessage);
+        String body = objectMapper.writeValueAsString(responseMessageDto);
         PrintWriter writer = response.getWriter();
         writer.print(body);
 
@@ -104,10 +106,11 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // ToDo. 스프링 시큐리티에서 한글 깨지는 현상 원인 추정, https://green-bin.tistory.com/119
         ObjectMapper objectMapper = new ObjectMapper();
-        ResponseMessage responseMessage = new ResponseMessage(401, "id is not registered or you have entered the id or password incorrectly", null);
+        StatusCode statusCode = StatusCode.LOGIN_FAILED;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
-        String body = objectMapper.writeValueAsString(responseMessage);
+        String body = objectMapper.writeValueAsString(responseMessageDto);
 
         // response body
         PrintWriter writer = response.getWriter();

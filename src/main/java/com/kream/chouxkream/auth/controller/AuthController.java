@@ -2,10 +2,10 @@ package com.kream.chouxkream.auth.controller;
 
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.service.AuthService;
-import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
+import com.kream.chouxkream.common.model.dto.StatusCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +31,9 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(REFRESH_TOKEN_TYPE)) {
@@ -43,8 +44,9 @@ public class AuthController {
         // refresh token null 체크
         if (refreshToken == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // refresh token 만료일 체크
@@ -52,24 +54,27 @@ public class AuthController {
             jwtUtils.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token expired", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_EXPIRED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // token type 체크
         String tokenType = jwtUtils.getType(refreshToken);
         if (!tokenType.equals(REFRESH_TOKEN_TYPE)) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "invalid refresh token type", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.INVALID_JWT_TOKEN;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // Redis에 저장되어 있는지 체크
         Boolean isExists = authService.isExistRefreshToken(refreshToken);
         if (!isExists) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token does not exist on the server", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // make new jwt token
@@ -85,8 +90,10 @@ public class AuthController {
         // response
         response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, newRefreshToken));
-        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
-        return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessage);
+
+        StatusCode statusCode = StatusCode.JWT_TOKEN_CREATED;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
 
     }
 
@@ -102,8 +109,9 @@ public class AuthController {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
         for (Cookie cookie : cookies) {
             if (cookie.getName().equals(REFRESH_TOKEN_TYPE)) {
@@ -114,8 +122,9 @@ public class AuthController {
         // refresh token null 체크
         if (refreshToken == null) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token is null", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // refresh token 만료일 체크
@@ -123,24 +132,27 @@ public class AuthController {
             jwtUtils.isExpired(refreshToken);
         } catch (ExpiredJwtException e) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token expired", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_EXPIRED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // token type 체크
         String tokenType = jwtUtils.getType(refreshToken);
         if (!tokenType.equals(REFRESH_TOKEN_TYPE)) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "invalid refresh token type", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.INVALID_JWT_TOKEN;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // Redis에 저장되어 있는지 체크
         Boolean isExists = authService.isExistRefreshToken(refreshToken);
         if (!isExists) {
 
-            ResponseMessage responseMessage = new ResponseMessage(400, "refresh token does not exist on the server", null);
-            return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(responseMessage);
+            StatusCode statusCode = StatusCode.JWT_TOKEN_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
         }
 
         // make new jwt token
@@ -155,8 +167,10 @@ public class AuthController {
         // response
         response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, newRefreshToken));
-        ResponseMessage responseMessage = new ResponseMessage(200, "", null);
-        return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessage);
+
+        StatusCode statusCode = StatusCode.JWT_TOKEN_CREATED;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
     }
 
     private Cookie createCookie(String key, String value) {

@@ -1,8 +1,6 @@
 package com.kream.chouxkream.common.controller;
 
 import com.kream.chouxkream.common.model.dto.ErrorMessageDto;
-import com.kream.chouxkream.common.model.entity.ResponseMessage;
-import com.kream.chouxkream.user.exception.UserServiceExeption;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -15,10 +13,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,37 +33,28 @@ public class ErrorHandleController {
         headers.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    // ###################################################################
-    // #                                                                 #
-
-
-    @ExceptionHandler(UserServiceExeption.class)
-    public ResponseEntity<ResponseMessage> UserServiceExceptionMethod(UserServiceExeption e) {
-
-        log.error(e.getMessage());
-        e.printStackTrace();
-
-        return ResponseEntity.status(400).body(e.getResponseMessage());
-    }
-
-
-    //email 중복에 대한 오류
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String, Object>> emailDuplicationExceptionMethod(DataIntegrityViolationException e) {
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("is_success", false);
-        response.put("error", "중복된 이메일 입니다.");
-        return ResponseEntity
-                .badRequest()
-                .body(response);
-    }
-
-
     // ########################################################################
     // # 4xx
     // ########################################################################
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<?> exceptionHandler(MessagingException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message("Failed to connect to the email server, invalid email address used, or authentication error occurred.")
+                .build(), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> exceptionHandler(DataIntegrityViolationException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message("Data integrity constraints have been violated")
+                .build(), headers, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = {HttpMessageNotReadableException.class})
     public ResponseEntity<?> exceptionHandler(HttpMessageNotReadableException e) {
         log.error(e.getMessage());

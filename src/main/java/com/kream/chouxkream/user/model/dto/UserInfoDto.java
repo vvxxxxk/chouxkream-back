@@ -15,6 +15,7 @@ public class UserInfoDto {
         this.email = user.getEmail();
         this.username = user.getUsername();
         this.nickname = user.getNickname();
+        this.userDesc = getUserDesc();
         this.phoneNumber = user.getPhoneNumber();
         this.point = user.getPoint();
     }
