@@ -24,4 +24,5 @@ class JasyptConfigTest extends JasyptConfig{
 
         assertThat(plainText).isEqualTo(decryptedText);
     }
+
 }
