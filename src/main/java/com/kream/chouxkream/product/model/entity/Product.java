@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 
 @Entity
 @Getter
-@Setter
+@Setter // 컬럼 당 setter 배정
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert

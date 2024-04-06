@@ -8,8 +8,6 @@ import javax.validation.constraints.Pattern;
 import java.util.List;
 
 @Data
-@Getter
-@Setter
 @Builder
 @AllArgsConstructor
 public class SearchDTO {

@@ -13,7 +13,6 @@ public class RedisConfig {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);
         redisTemplate.setDefaultSerializer(new StringRedisSerializer());
-        // 다른 설정들을 추가할 수 있습니다.
         return redisTemplate;
     }
 }

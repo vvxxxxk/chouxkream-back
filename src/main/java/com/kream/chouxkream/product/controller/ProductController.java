@@ -1,18 +1,10 @@
 package com.kream.chouxkream.product.controller;
 
-import com.kream.chouxkream.product.ProductSpecification;
 import com.kream.chouxkream.product.model.dto.SearchDTO;
-import com.kream.chouxkream.product.model.entity.Product;
-import com.kream.chouxkream.product.repository.ProductRepository;
 import com.kream.chouxkream.product.service.ProductService;
-import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -32,5 +24,10 @@ public class ProductController {
     @GetMapping("/api/search/rank")
     public List<String> searchRankList(){
         return productService.getPopularSearches();
+    }
+
+    @GetMapping("/api/search/auto")
+    public Set<Object> search(@RequestParam("keyword") String keyword) {
+        return productService.getSearchSuggestions(keyword);
     }
 }
