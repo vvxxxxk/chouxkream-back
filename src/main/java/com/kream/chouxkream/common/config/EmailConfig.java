@@ -1,4 +1,4 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +14,7 @@ public class EmailConfig {
 
     @Value("${spring.mail.password}")
     private String password;
+
 
     @Bean
     public JavaMailSender mailSender() {//JAVA MAILSENDER 인터페이스를 구현한 객체를 빈으로 등록하기 위함.

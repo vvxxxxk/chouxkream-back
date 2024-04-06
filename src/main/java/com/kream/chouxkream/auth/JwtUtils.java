@@ -44,7 +44,7 @@ public class JwtUtils {
 
         return Jwts.builder()
                 .claim("type", type)
-                .claim("email", type)
+                .claim("email", email)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expireMs))

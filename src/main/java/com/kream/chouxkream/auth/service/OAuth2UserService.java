@@ -54,6 +54,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             user.setUsername(oAuth2Response.getName());
             user.setPassword("password");               // 비밀번호 NOT NULL 조건에 의해 임시로 작성
             user.setPhoneNumber("010-0000-0000");       // 연락처 NOT NULL 조건에 의해 임시로 작성
+            user.setActive(true);
             userRepository.save(user);
 
             Role role = new Role();

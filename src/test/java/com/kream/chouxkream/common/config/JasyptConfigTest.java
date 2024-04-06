@@ -11,7 +11,7 @@ class JasyptConfigTest extends JasyptConfig{
     public void jasypt_encrypt_decrypt_test() {
 
         String encrptKey = System.getProperty("jasypt.encryptor.password");
-        String plainText = "";
+        String plainText = "asd123";
 
         StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
         jasypt.setPassword(encrptKey);

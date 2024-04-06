@@ -1,4 +1,4 @@
-package com.kream.chouxkream.config;
+package com.kream.chouxkream.common.config;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Bean;

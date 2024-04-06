@@ -1,57 +1,66 @@
 package com.kream.chouxkream.common.controller;
 
 
+
+import com.kream.chouxkream.common.model.dto.ErrorMessageDto;
+import com.kream.chouxkream.common.model.entity.ResponseMessage;
+import com.kream.chouxkream.user.exception.UserServiceExeption;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import javax.validation.ConstraintViolationException;
-
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class ErrorHandleController extends ResponseEntityExceptionHandler {
+public class ErrorHandleController {
 
-    // example
+    private final HttpHeaders headers = new HttpHeaders();
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> exampleExceptionMethod(Exception e) {
+
+    @PostConstruct
+    public void init() {
+        headers.setContentType(MediaType.APPLICATION_JSON);
+    }
+
+    // ###################################################################
+    // #                                                                 #
+
+
+    @ExceptionHandler(UserServiceExeption.class)
+    public ResponseEntity<ResponseMessage> UserServiceExceptionMethod(UserServiceExeption e) {
+
 
         log.error(e.getMessage());
         e.printStackTrace();
 
-        return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(400).body(e.getResponseMessage());
     }
 
-    //email 형식에 대한 오류
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<Map<String, Object>> emailFormExceptionMethod(ConstraintViolationException e) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("is_success", false);
-        response.put("error", "이메일 양식에 맞게 입력 해주십시오.");
-        return ResponseEntity
-                .badRequest()
-                .body(response);
-    }
+
 
     //email 중복에 대한 오류
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<Map<String, Object>> emailDuplicationExceptionMethod(DataIntegrityViolationException e) {
+
         Map<String, Object> response = new HashMap<>();
         response.put("is_success", false);
         response.put("error", "중복된 이메일 입니다.");
@@ -60,14 +69,69 @@ public class ErrorHandleController extends ResponseEntityExceptionHandler {
                 .body(response);
     }
 
-    //pw 형식에 대한 오류
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("is_success", false);
-        response.put("error", "패스워드의 형식을 맞춰 주십시오.");
-        return ResponseEntity
-                .badRequest()
-                .body(response);
+
+    // ########################################################################
+    // # 4xx
+    // ########################################################################
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    public ResponseEntity<?> exceptionHandler(HttpMessageNotReadableException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message("Required request body is missing")
+                .build(), headers, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    public ResponseEntity<?> exceptionHandler(IllegalArgumentException e) {
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(e.getMessage())
+                .build(), headers, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {MethodArgumentNotValidException.class})
+    public ResponseEntity<?> exceptionHandler(MethodArgumentNotValidException e) {
+        BindingResult bindingResult = e.getBindingResult();
+
+        // 에러 메시지를 담을 Map 생성
+        Map<String, String> errors = new HashMap<>();
+
+        // 모든 필드 에러를 순회하며 메시지를 Map에 추가
+        for (FieldError fieldError : bindingResult.getFieldErrors()) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        }
+
+        // 사용자 정의 에러 메시지 객체에 에러 메시지 Map을 포함시켜 반환
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(errors.toString())
+                .build(), headers, HttpStatus.BAD_REQUEST);
+    }
+
+
+    // ########################################################################
+    // # 5xx
+    // ########################################################################
+    @ExceptionHandler(value = {RuntimeException.class})
+    public ResponseEntity<?> exceptionHandler(RuntimeException e) {
+        e.printStackTrace();
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("INTERNAL_SERVER_ERROR")
+                .build(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<?> exceptionHandler(Exception e) {
+        e.printStackTrace();
+        log.error(e.getMessage());
+        return new ResponseEntity<>(ErrorMessageDto.builder()
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("INTERNAL_SERVER_ERROR")
+                .build(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }

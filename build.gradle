@@ -7,6 +7,10 @@ plugins {
 group = 'com.kream'
 version = '0.0.1-SNAPSHOT'
 
+jar {
+	enabled = false // Disable the default JAR task # plain JAR 제외
+}
+
 java {
 	sourceCompatibility = '17'
 }
@@ -20,7 +24,6 @@ configurations {
 repositories {
 	mavenCentral()
 }
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -47,6 +50,9 @@ dependencies {
 	// Spring Context Support
 	implementation 'org.springframework:spring-context-support:5.3.9'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-mail', version: '2.6.3'
+	// Swagger
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 }
 
 tasks.named('test') {

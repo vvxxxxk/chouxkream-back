@@ -1,6 +1,7 @@
 package com.kream.chouxkream.common.config;
 
 import com.kream.chouxkream.auth.JwtUtils;
+import com.kream.chouxkream.auth.OAuth2SuccessHandler;
 import com.kream.chouxkream.auth.filter.*;
 import com.kream.chouxkream.auth.service.AuthService;
 import com.kream.chouxkream.auth.service.OAuth2UserService;
@@ -15,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
@@ -26,14 +28,12 @@ import java.util.Collections;
 import java.util.List;
 
 @Configuration
-@EnableWebSecurity  // 스프링 시큐리티를 통해 웹 보안 설정 활성화
+@EnableWebSecurity
 public class SecurityConfig {
 
-    // jwt
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtils jwtUtils;
     private final AuthService authService;
-    // oauth2
     private final OAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
@@ -55,15 +55,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new CustomAuthenticationEntryPoint();
     }
 
     @Bean
@@ -96,19 +95,19 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/", "/all", "/redis", "/api/**", "/api/user/login", 
-                                        "/api/auth/join", "/api/mail/**", "/api/user/join").permitAll()
+                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/users/**").permitAll()
+                        .antMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
                         .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
-                        .anyRequest().authenticated());                  
+                        .anyRequest().authenticated())
+                .exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint());      // ToDo. 권한 없는 페이지 가면 임시로 메인 페이지로 이동하도록
 
         // 필터 등록
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, authService), LogoutFilter.class);
-//        http
-//                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
         http
-                .addFilterBefore(new JWTFilter(jwtUtils), JwtLoginFilter.class);
+                .addFilterBefore(new JwtVerificationFilter(jwtUtils), JwtLoginFilter.class);
         http
                 .addFilterAt(new JwtLoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, authService), UsernamePasswordAuthenticationFilter.class);
 
@@ -116,6 +115,8 @@ public class SecurityConfig {
         http
                 .formLogin().disable()
                 .headers().frameOptions().disable();
+
+
 
         return http.build();
 

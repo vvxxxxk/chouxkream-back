@@ -1,10 +1,16 @@
 package com.kream.chouxkream.auth.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kream.chouxkream.auth.JwtUtils;
 import com.kream.chouxkream.auth.model.dto.OAuth2UserImpl;
+import com.kream.chouxkream.auth.model.dto.UserDetailsImpl;
+import com.kream.chouxkream.common.model.entity.ResponseMessage;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.user.model.entity.User;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,24 +36,41 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("JwtVerificationFilter.doFilterInternal");
         // 헤더에서 access키에 담긴 토큰을 꺼냄
         String accessToken = request.getHeader(ACCESS_TOKEN_TYPE);
 
         // 토큰이 없다면 다음 필터로 넘김
-        if (accessToken == null) {
+        if (accessToken == null ) {
             filterChain.doFilter(request, response);
             return ;
         }
+
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
 
         // 토큰 만료 여부 검증 (만료되어도 다음 필터로 넘기지 않음)
         try {
             jwtUtils.isExpired(accessToken);
         } catch (ExpiredJwtException e) {
 
-            // response body
+            ResponseMessage responseMessage = new ResponseMessage(401, "access token expired", null);
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
             PrintWriter writer = response.getWriter();
-            writer.print("access token expired");
+            writer.print(body);
+
+            // response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        } catch (MalformedJwtException e) {
+
+            ResponseMessage responseMessage = new ResponseMessage(401, "unable to parse the access token", null);
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+            PrintWriter writer = response.getWriter();
+            writer.print(body);
 
             // response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -58,9 +81,12 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         String tokenType = jwtUtils.getType(accessToken);
         if (!tokenType.equals(ACCESS_TOKEN_TYPE)) {
 
-            // response body
+            ResponseMessage responseMessage = new ResponseMessage(401, "invalid access token type", null);
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
             PrintWriter writer = response.getWriter();
-            writer.print("invalid token expired");
+            writer.print(body);
 
             // response status code
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -77,15 +103,36 @@ public class JwtVerificationFilter extends OncePerRequestFilter {
         user.setEmail(email);
         role.setRoleName(role_name);
 
-        // UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
-        OAuth2UserImpl oAuth2User = new OAuth2UserImpl(user, role);
+        if (role_name.equals("ROLE_USER") || role_name.equals("ROLE_ADMIN")) {
 
-        // 스프링 시큐리티 인증 토큰 생성
-        //Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
-        Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
-        // 세션에 사용자 등록
-        SecurityContextHolder.getContext().setAuthentication(authToken);
+            UserDetailsImpl userDetailsImpl = new UserDetailsImpl(user, role);
 
-        filterChain.doFilter(request, response);
+            // 스프링 시큐리티 인증 토큰 생성
+            Authentication authToken = new UsernamePasswordAuthenticationToken(userDetailsImpl, null, userDetailsImpl.getAuthorities());
+            // 세션에 사용자 등록
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            filterChain.doFilter(request, response);
+        } else if (role_name.equals("ROLE_SOCIAL")) {
+
+            OAuth2UserImpl oAuth2User = new OAuth2UserImpl(user, role);
+
+            // 스프링 시큐리티 인증 토큰 생성
+            Authentication authToken = new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
+            // 세션에 사용자 등록
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+            filterChain.doFilter(request, response);
+        } else {
+
+            ResponseMessage responseMessage = new ResponseMessage(401, "invalid role_name", null);
+
+            // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
+            String body = objectMapper.writeValueAsString(responseMessage);
+            PrintWriter writer = response.getWriter();
+            writer.print(body);
+
+            // response status code
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
     }
 }
