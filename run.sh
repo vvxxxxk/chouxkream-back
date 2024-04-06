@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# ./application.yml을 /src/main/resources/application.yml로 복사
+echo "./application.yml을 /src/main/resources/application.yml로 복사합니다..."
+if cp ./application.yml /src/main/resources/application.yml; then
+  echo "./application.yml을 /src/main/resources/application.yml로 성공적으로 복사했습니다."
+else
+  echo "./application.yml을 /src/main/resources/application.yml로 복사하는 과정에서 오류가 발생했습니다."
+  exit 1
+fi
+
+
 # Docker Compose를 사용하여 컨테이너 중지 및 삭제
 echo "Docker Compose를 사용하여 컨테이너를 중지하고 삭제합니다..."
 if docker compose down -v; then
