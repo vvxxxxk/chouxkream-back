@@ -19,6 +19,7 @@ public enum StatusCode {
     FIND_EAMIL_SUCCESS(2013, "이메일 찾기 성공"),
     FIND_USER_SUCCESS(2014, "사용자 조회 성공"),
 
+
     // 결제 관련 성공코드
     PAYMENT_SUCCESS(2005, "결제 성공"),
 
@@ -31,6 +32,7 @@ public enum StatusCode {
     AUTH_EMAIL_CHECK_FAILED(4014, "인증메일 인증 실패 하였습니다."),
     FIND_EAMIL_FAILED(4015, "이메일 찾기 실패 하였습니다."),
     FIND_USER_FAILED(4016, "일치하는 사용자 정보를 찾을 수 없습니다."),
+    CHECK_PASSWORD_FAILED(4017,"계정 비밀번호와 일치하지 않습니다."),
 
     // 결제 관련 에러 코드
     PAYMENT_REJECTED(4004, "결제가 거부되었습니다."),
