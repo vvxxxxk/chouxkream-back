@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -302,30 +303,30 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
-    @ApiOperation(value = "비밀번호 변경")
-    @PostMapping("/me/password")
-    public ResponseEntity<ResponseMessageDto> updatePassword(@Valid @RequestBody PasswordDto updatePasswordDto) {
-
-        // **
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        String updatePassword = updatePasswordDto.getPassword();
-        userService.updatePassword(email, updatePassword);
-
-        StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
-        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-    }
+//    @ApiOperation(value = "비밀번호 변경")
+//    @PostMapping("/me/password")
+//    public ResponseEntity<ResponseMessageDto> updatePassword(@Valid @RequestBody PasswordDto updatePasswordDto) {
+//
+//        // **
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//
+//        // 사용자 검증
+//        boolean isExistEmail = userService.isEmailExists(email);
+//        if (!isExistEmail) {
+//
+//            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//        }
+//
+//        String updatePassword = updatePasswordDto.getPassword();
+//        userService.updatePassword(email, updatePassword);
+//
+//        StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
+//        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//    }
 
     @ApiOperation(value = "비밀번호 확인 및 변경")
     @PostMapping("/me/password")
@@ -364,4 +365,77 @@ public class UserController {
         }
 
     }
+
+
+    //        bid테이블에서 해당유저 번호 맞는거 찾아서..
+    //유저정보 입력-> 해당유저 point 반환하는 메서드 만들고 여따 추가
+
+    // 포인트 적립기록, 만료기록, 사용기록 데이터 불러와야됨. -> 데이터반환해야함. 리스폰스 dto에?
+    // 결제내역,.,결제되어야 적립이되는데 결제내역에서 참조할 수 있는 포인트 정보가 없음.
+    // 적립기록 -> 결제기록으로 ?
+    // 뭘로..?리스트로? 노노 데이터로. 회원조회response참고혀.
+// ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            responseMessageDto.addData("user", userInfoDto); 이러케 데이터 반환해야댐,
+    //if (pointCouponDto != null) {
+    //            // if문, 포인트 쿠폰 받아온거 있으면, 포인트 쌓아주기. void 반환, 메서드.
+    //        }
+
+    @ApiOperation(value = "포인트 조회")
+    @GetMapping("/me/point")
+    public ResponseEntity<ResponseMessageDto> getPoints(@RequestBody(required = false) PointCouponDto pointCouponDto) { // 입력 매개변수로 포인트적립쿠폰? 입력 받아오는거 넣기. 필수 X.
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+        String email = "test@test.com";
+
+
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            UserInfoDto userInfoDto = new UserInfoDto(optionalUser.get());
+            System.out.println(optionalUser.get().getPoint());
+            System.out.println(userInfoDto.getPoint());
+
+
+            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto();
+            responseMessageDto.setCode(statusCode.getCode());
+            responseMessageDto.setMessage(statusCode.getMessage());
+            responseMessageDto.addData("points", userInfoDto.getPoint());
+
+
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), new HashMap<>());
+
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        } else {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+
+
+
+
+//
+//        Integer myPoints = userService.getMyPoints(email);
+//
+//        StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+//        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//        responseMessageDto.addData("getMyPoints",myPoints);
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+
+    }
+
+//    @ApiOperation(value = "회원 탈퇴")
+//    @DeleteMapping("/me")
+//    public ResponseEntity<ResponseMessageDto> unActivateUser() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//
+//        userService.DeActivateUser(email);
+//
+//        StatusCode statusCode = StatusCode.
+//    }
 }

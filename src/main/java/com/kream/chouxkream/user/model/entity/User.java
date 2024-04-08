@@ -63,4 +63,8 @@ public class User {
     public void encodePassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(password);
     }
+
+    public void deActivate() {
+        this.isActive = false;
+    }
 }

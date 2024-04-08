@@ -270,4 +270,14 @@ public class UserService {
         }
     }
 
+    public int getMyPoints(String email) {
+        User targetUser = userRepository.findByEmail(email).get();
+        return targetUser.getPoint();
+    }
+
+    public void DeActivateUser(String email) {
+        User targetUser = userRepository.findByEmail(email).get();
+        targetUser.deActivate();
+
+    }
 }
