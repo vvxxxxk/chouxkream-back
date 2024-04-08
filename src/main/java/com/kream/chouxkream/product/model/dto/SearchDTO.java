@@ -21,4 +21,8 @@ public class SearchDTO {
     private List<String> brand;
 
     private String sort;
+
+    private int pagingIndex;
+
+    private int pagingSize;
 }

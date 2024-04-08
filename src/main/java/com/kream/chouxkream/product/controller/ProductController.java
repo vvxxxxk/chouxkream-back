@@ -28,6 +28,11 @@ public class ProductController {
 
     @GetMapping("/api/search/auto")
     public Set<Object> search(@RequestParam("keyword") String keyword) {
-        return productService.getSearchSuggestions(keyword);
+        return productService.getSearchSuggestions(keyword, 10);
+    }
+
+    @GetMapping("/api/search/test")
+    public void saveSubTitle(){
+       productService.saveSearchKeyword();
     }
 }

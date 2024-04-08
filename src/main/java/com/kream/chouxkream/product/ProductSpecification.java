@@ -56,5 +56,17 @@ public class ProductSpecification {
         };
     }
 
+    //정렬 추가
+    public static Specification<Product> sort(String sort) {
+        return (root, query, criteriaBuilder) -> {
+            if ("pNo".equals(sort)) {
+                query.orderBy(criteriaBuilder.asc(root.get("productNo")));
+            } else if ("pNoDesc".equals(sort)) {
+                query.orderBy(criteriaBuilder.desc(root.get("productNo")));
+            }
+            return null;
+        };
+    }
+
 
 }
