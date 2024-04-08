@@ -271,13 +271,23 @@ public class UserService {
     }
 
     public int getMyPoints(String email) {
-        User targetUser = userRepository.findByEmail(email).get();
-        return targetUser.getPoint();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("not found user"));
+        return user.getPoint();
     }
 
+    @Transactional
     public void DeActivateUser(String email) {
-        User targetUser = userRepository.findByEmail(email).get();
-        targetUser.deActivate();
-
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(()->new RuntimeException("not found user"));
+        user.deActivate();
+        userRepository.save(user);
+    }
+    @Transactional
+    public void ActivateUser(String email) {
+        User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("not found user"));
+        user.Activate();
+        userRepository.save(user);
     }
 }
