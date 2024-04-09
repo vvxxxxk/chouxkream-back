@@ -283,27 +283,27 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
-    @ApiOperation(value = "비밀번호 확인")
-    @GetMapping("/me/password")
-    public ResponseEntity<ResponseMessageDto> checkPassword(@Valid @RequestBody PasswordDto passwordDto) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        String password = passwordDto.getPassword();
-        boolean isCheckPassword = userService.isPasswordCheck(email, password);
-
-        if (!isCheckPassword) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
-        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-    }
+//    @ApiOperation(value = "비밀번호 확인")
+//    @GetMapping("/me/password")
+//    public ResponseEntity<ResponseMessageDto> checkPassword(@Valid @RequestBody PasswordDto passwordDto) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//
+//        String password = passwordDto.getPassword();
+//        boolean isCheckPassword = userService.isPasswordCheck(email, password);
+//
+//        if (!isCheckPassword) {
+//
+//            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//        }
+//
+//        StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+//        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//    }
 
 //    @ApiOperation(value = "비밀번호 변경")
 //    @PostMapping("/me/password")
@@ -330,43 +330,44 @@ public class UserController {
 //        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 //    }
 
-    @ApiOperation(value = "비밀번호 확인 및 변경")
-    @PostMapping("/me/password")
-    public ResponseEntity<ResponseMessageDto> updatePasswordhsy(@Valid @RequestBody PasswordDto updatePasswordDto,
-                                                                @Valid @RequestBody PasswordDto checkPasswordDto) {
-
-        // **
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-
-        String checkPassword = checkPasswordDto.getPassword();
-        boolean isCheckPassword = userService.isPasswordCheck(email, checkPassword);
-
-        if (!isCheckPassword) {// 클라이언트의 재입력 기다리기, 비동기로. 어떻게 ,., 응답보냄?
-
-            StatusCode statusCode = StatusCode.CHECK_PASSWORD_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        } else {
-            String updatePassword = updatePasswordDto.getPassword();
-            userService.updatePassword(email, updatePassword);
-
-            StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-    }
+//    @ApiOperation(value = "비밀번호 확인 및 변경")
+//    @PostMapping("/me/password")
+//    public ResponseEntity<ResponseMessageDto> checkAndUpdatePassword(@Valid @RequestBody PasswordDto passwordDto) {
+//
+//        // **
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//
+//        //
+//
+//        // 사용자 검증
+//        boolean isExistEmail = userService.isEmailExists(email);
+//        if (!isExistEmail) {
+//
+//            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//        }
+//
+//
+//        String checkPassword = checkPasswordDto.getPassword();
+//        boolean isCheckPassword = userService.isPasswordCheck(email, checkPassword);
+//
+//        if (!isCheckPassword) {// 클라이언트의 재입력 기다리기, 비동기로. 어떻게 ,., 응답보냄?
+//
+//            StatusCode statusCode = StatusCode.CHECK_PASSWORD_FAILED;
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//        } else {
+//            String updatePassword = updatePasswordDto.getPassword();
+//            userService.updatePassword(email, updatePassword);
+//
+//            StatusCode statusCode = StatusCode.USER_INFO_UPDATE_SUCCESS;
+//            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+//        }
+//
+//    }
 
     @ApiOperation(value = "포인트 조회")
     @GetMapping("/me/point")
