@@ -1,6 +1,6 @@
 package com.kream.chouxkream.user.service;
 
-import com.kream.chouxkream.productsize.model.entity.ProductSize;
+import com.kream.chouxkream.productsize.ProductSize;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.repository.WishlistRepository;
@@ -18,17 +18,19 @@ public class WishlistService {
         return this.wishListRepository.findAllByUserNo(user.getUserNo());
     }
 
-    public void updateWishlist (User user, ProductSize productSize) {
+    public boolean updateWishlist (User user, ProductSize productSize) {
         if (!wishListRepository.existsByUserAndProductSize(user, productSize)){ //없으면 추가
             Wishlist wishlist = new Wishlist();
-            wishlist.setUser(user);
+            user.setWishlist(wishlist);
             this.wishListRepository.save(wishlist);
 
             productSize.setWishlist(wishlist);
             this.wishListRepository.save(wishlist);
+            return true;
         } else { //있는 경우
             Wishlist wishlist = productSize.getWishlist();
             this.wishListRepository.delete(wishlist);
+            return false;
         }
     }
 

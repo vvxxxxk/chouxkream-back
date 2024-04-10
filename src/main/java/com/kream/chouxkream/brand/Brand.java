@@ -1,6 +1,6 @@
-package com.kream.chouxkream.category.model.entity;
+package com.kream.chouxkream.brand;
 
-import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,14 +16,19 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
+public class Brand {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryNo;
+    private String brandId;
 
     @Column(nullable = false)
-    private String categoryName;
+    private String brandName;
+
+    @Column(nullable = true)
+    private String brandSubName;
+
+    @Column(nullable = true)
+    private String brandLogoUrl;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createDate;
@@ -31,6 +36,9 @@ public class Category {
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Timestamp updateDate;
 
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
+    private boolean isActive;
+
+    @OneToMany(mappedBy = "brand", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Product> products = new HashSet<>();
 }

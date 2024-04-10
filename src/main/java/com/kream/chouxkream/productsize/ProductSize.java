@@ -1,6 +1,6 @@
-package com.kream.chouxkream.productsize.model.entity;
+package com.kream.chouxkream.productsize;
 
-import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.Product;
 import com.kream.chouxkream.user.model.entity.Wishlist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,7 +33,7 @@ public class ProductSize {
     @JoinColumn(name = "product_no")
     private Product product;
 
-    @ManyToOne
+    @ManyToOne // 여러개의 productsize객체들이 하나의 wishlist를 참조할수 있다.
     private Wishlist wishlist;
 
     public void setWishlist(Wishlist wishlist) {

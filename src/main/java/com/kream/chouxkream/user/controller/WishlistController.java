@@ -2,11 +2,11 @@ package com.kream.chouxkream.user.controller;
 
 import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
 import com.kream.chouxkream.common.model.dto.StatusCode;
-import com.kream.chouxkream.productsize.model.entity.ProductSize;
-import com.kream.chouxkream.productsize.model.entity.ProductSizeDto;
+import com.kream.chouxkream.productsize.ProductSize;
+import com.kream.chouxkream.productsize.ProductSizeDto;
+import com.kream.chouxkream.productsize.ProductSizeService;
 import com.kream.chouxkream.user.ResourceNotFoundException;
 import com.kream.chouxkream.user.model.entity.User;
-import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.service.UserService;
 import com.kream.chouxkream.user.service.WishlistService;
 import io.swagger.annotations.ApiOperation;
@@ -17,8 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,7 +25,7 @@ import java.util.Set;
 public class WishlistController {
     private final WishlistService wishlistService;
     private final UserService userService;
-
+    private final ProductSizeService productSizeService;
     @ApiOperation(value = "관심 상품 조회")
     @GetMapping
     public ResponseEntity<ResponseMessageDto> getWishLists (){
@@ -37,7 +36,7 @@ public class WishlistController {
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            Set<Wishlist> myWishList = user.getWishlistSet();
+//            Set<Wishlist> myWishList = user.getWishlistSet();
 //          wishlist 에 productsize들 각각 이름,사진 가격 꺼내와야함 String으로?
 
 
@@ -56,18 +55,25 @@ public class WishlistController {
     @PostMapping
     public ResponseEntity<ResponseMessageDto> addOrDeleteWishList(@RequestBody ProductSizeDto productSizeDto){ //토글//product Size No?받아와야함.
         //if userno가 wishlist에 잇으면 해제. 없으면 등록.
-        String userEmail = getSiteUserEmail();
+       // String email = getSiteUserEmail();
+        String email = "ee121111@test.com";
         try {
-            boolean isExists;
+
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            ProductSize productSize = productsizeservice.getbyNo(productSizeDto.getNo);
+            ProductSize productSize = productSizeService.getProductSizeByNo(productSizeDto.getProductNo());
+            boolean isWishlistRegistered = wishlistService.updateWishlist(user, productSize);
 
-            wishlistService.updateWishlist(user, productSize);
+            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            responseMessageDto.addData("관심상품 등록 여부" , isWishlistRegistered);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
-        } catch () {
-
+        } catch (ResourceNotFoundException ex) {
+            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
 

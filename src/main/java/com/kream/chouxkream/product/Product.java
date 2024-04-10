@@ -1,9 +1,9 @@
-package com.kream.chouxkream.product.model.entity;
+package com.kream.chouxkream.product;
 
-import com.kream.chouxkream.brand.model.entity.Brand;
-import com.kream.chouxkream.category.model.entity.Category;
-import com.kream.chouxkream.productimages.model.entity.ProductImages;
-import com.kream.chouxkream.productsize.model.entity.ProductSize;
+import com.kream.chouxkream.brand.Brand;
+import com.kream.chouxkream.category.Category;
+import com.kream.chouxkream.productimages.ProductImages;
+import com.kream.chouxkream.productsize.ProductSize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

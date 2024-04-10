@@ -1,4 +1,4 @@
-package com.kream.chouxkream.productsize.model.entity;
+package com.kream.chouxkream.productsize;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
