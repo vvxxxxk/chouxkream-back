@@ -74,8 +74,8 @@ public class ProductService {
         }
     }
 
-    public Set<Object> getSearchSuggestions(String keword, int cnt) {
-        Range range = Range.range().gte(keword).lte(keword + '\uffff');
+    public Set<Object> getSearchSuggestions(String keyword, int cnt) {
+        Range range = Range.range().gte(keyword).lte(keyword + '\uffff');
         Limit limit = Limit.limit().count(cnt); // 최대 결과 수
         return redisTemplate.opsForZSet().rangeByLex(SEARCH_KEY, range, limit);
     }
