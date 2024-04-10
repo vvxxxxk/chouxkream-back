@@ -29,8 +29,8 @@ public class ProductController {
         return result;
     }
 
-    @GetMapping("/api/search/rank")
-    public Map<String,Object> searchRankList(){
+    @GetMapping("/api/search/popular-keyword")
+    public Map<String,Object> searchPopularKeyword(){
         Map<String, Object> result = new HashMap<>();
         result.put("is_success", true);
         result.put("data", productService.getPopularSearches());
@@ -45,8 +45,13 @@ public class ProductController {
         return result;
     }
 
-    @GetMapping("/api/search/test")
+    @PostMapping("/api/search/subtitle")
     public void saveSubTitle(){
        productService.saveSearchKeyword();
+    }
+
+    @GetMapping("/api/search/recent-keyword")
+    public void searchRecentKeyword(){
+
     }
 }

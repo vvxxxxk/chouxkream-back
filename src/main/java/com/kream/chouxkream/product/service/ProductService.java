@@ -28,6 +28,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private static final String POPULAR_SEARCH_KEY = "popular_searches";
     private static final String SEARCH_KEY = "search_autocomplete";
+    private static final String RECENT_SEARCH_KEY = "search_autocomplete";
     private final RedisTemplate<String, Object> redisTemplate;
 
 // 인덱싱, 클린코딩
@@ -78,5 +79,6 @@ public class ProductService {
         Limit limit = Limit.limit().count(cnt); // 최대 결과 수
         return redisTemplate.opsForZSet().rangeByLex(SEARCH_KEY, range, limit);
     }
+
 
 }
