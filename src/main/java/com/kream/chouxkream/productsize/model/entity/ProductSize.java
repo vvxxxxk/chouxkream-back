@@ -35,4 +35,12 @@ public class ProductSize {
 
     @ManyToOne
     private Wishlist wishlist;
+
+    public void setWishlist(Wishlist wishlist) {
+        this.wishlist = wishlist;
+    }
+
+    public Wishlist getWishlist() {
+        return wishlist;
+    }
 }

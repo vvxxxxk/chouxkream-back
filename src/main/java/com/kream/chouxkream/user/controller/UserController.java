@@ -435,46 +435,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
-//        Optional<User> optionalUser = userService.findByEmail(email);
-//        if (optionalUser.isPresent()) {
-//            userService.DeActivateUser(email);
-//
-//            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
-//            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-//
-//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-//        } else {
-//            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-//            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-//
-//            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-//        }
-
-    }
-
-    @ApiOperation(value = "관심 상품 조회")
-    @GetMapping("/me/wishlist")
-    public ResponseEntity<ResponseMessageDto> getWishlists() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName();
-        String email = "ee121111@test.com";
-        try {
-
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
-
-            Set<Wishlist> myWishList = user.getWishlistSet();
-
-
-            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            //프로덕트사이즈리스폰스해야댐ㅅㅂ 디티오로?
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        } catch(ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
     }
 
 

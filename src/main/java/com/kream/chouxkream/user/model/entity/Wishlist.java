@@ -12,9 +12,8 @@ import java.util.Set;
 public class Wishlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long wishlistNo;
-
-    @ManyToOne
+    private Long wishListNo;
+    @OneToOne
     @JoinColumn(name = "user_no")
     private User user;
 
