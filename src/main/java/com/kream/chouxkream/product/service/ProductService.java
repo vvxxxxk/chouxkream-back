@@ -30,7 +30,7 @@ public class ProductService {
     private static final String SEARCH_KEY = "search_autocomplete";
     private final RedisTemplate<String, Object> redisTemplate;
 
-// 1 .페이징o 2. 정렬(sort 구현)o 3. 인덱싱 4. 자동완성 기능을 sub_title로 구현하기o 5. 검색 기능 파라미터 url로 돌리기 6. 클린코딩 7. 검색어가 없을 때 저장되지 않도록 처리o
+// 인덱싱, 클린코딩
 
     public Page<Product> search(SearchDTO searchDTO){
         Pageable pageable = PageRequest.of(searchDTO.getPagingIndex(),searchDTO.getPagingSize());
@@ -47,7 +47,7 @@ public class ProductService {
         if(searchDTO.getSort() != null)
             spec = spec.and(ProductSpecification.sort(searchDTO.getSort()));
         Page<Product> list = productRepository.findAll(spec, pageable);
-        if(list.isEmpty()&&searchDTO.getKeyword() != null){
+        if(!list.isEmpty()&&searchDTO.getKeyword() != null){
             redisTemplate.opsForZSet().incrementScore(POPULAR_SEARCH_KEY, searchDTO.getKeyword(), 1);// 인기 검색어 선정을 위한
         }
         return list;
@@ -66,7 +66,7 @@ public class ProductService {
         List<String> subTitleList = new ArrayList<>();
 
         for (ProductMapping product : productList) {
-                subTitleList.add(product.getSubTitle());
+                subTitleList.add(product.getProductSubTitle());
         }
         for (String str : subTitleList) {
             redisTemplate.opsForZSet().add(SEARCH_KEY, str, 1);

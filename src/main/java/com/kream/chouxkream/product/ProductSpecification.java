@@ -22,9 +22,9 @@ public class ProductSpecification {
                         "concat",
                         String.class,
                         // title, subtitle, modelId 에서 검색 진행
-                        root.get("title"),
+                        root.get("productTitle"),
                         builder.literal(" "),
-                        root.get("subTitle"),
+                        root.get("productSubTitle"),
                         builder.literal(" "),
                         root.get("modelId")
                 );
@@ -36,7 +36,7 @@ public class ProductSpecification {
     //컬러를 통한 검색, 여러개의 색깔을 검색을 위해 배열로 받음
     public static Specification<Product> equalColor(List<String> colors) {
         return (root, query, criteriaBuilder) -> {
-            return root.get("color").in(colors);
+            return root.get("productColor").in(colors);
         };
     }
 

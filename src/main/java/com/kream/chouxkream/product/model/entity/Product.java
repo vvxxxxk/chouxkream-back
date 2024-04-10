@@ -20,17 +20,17 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productNo;
 
-    @Column(nullable = false, name = "product_title")
-    private String title;
+    @Column(nullable = false)
+    private String productTitle;
 
-    @Column(nullable = false, name = "product_sub_title")
-    private String subTitle;
+    @Column(nullable = false)
+    private String productSubTitle;
 
     @Column(nullable = false)
     private String modelId;
 
-    @Column(nullable = true, name="product_color")
-    private String color;
+    @Column(nullable = true)
+    private String productColor;
 
     @Column(nullable = true)
     private Integer releasePrice;
@@ -53,11 +53,11 @@ public class Product {
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean isActive;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="brand_id")
     private Brand brand;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="category_no")
     private Category category;
 }

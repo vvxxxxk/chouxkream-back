@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class SearchDTO {
     //like문으로 처리
     private String keyword;
@@ -25,4 +26,5 @@ public class SearchDTO {
     private int pagingIndex;
 
     private int pagingSize;
+
 }
