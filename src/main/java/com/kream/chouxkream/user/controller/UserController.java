@@ -450,6 +450,13 @@ public class UserController {
 
     }
 
+    @ApiOperation(value = "관심 상품 조회")
+    @GetMapping("/me/wishlist")
+    public ResponseEntity<ResponseMessageDto> getWishlists() {
+
+    }
+
+
     private ResponseMessageDto setResponseMessageDto (StatusCode statusCode) {
         ResponseMessageDto responseMessageDto = new ResponseMessageDto();
         responseMessageDto.setCode(statusCode.getCode());

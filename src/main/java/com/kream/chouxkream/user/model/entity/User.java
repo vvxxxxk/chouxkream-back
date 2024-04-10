@@ -54,10 +54,11 @@ public class User {
     @Column(columnDefinition = "bit default 0")
     private boolean isActive;
 
-
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<UserRole> userRoles = new HashSet<>();
+
+    private Set<Wishlist> wishlist
 
 
     public void encodePassword(PasswordEncoder passwordEncoder){
