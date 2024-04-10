@@ -7,6 +7,7 @@ import com.kream.chouxkream.user.model.dto.UserRoleKey;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.UserRole;
+import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.repository.AuthNumberRepositroy;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
@@ -23,6 +24,7 @@ import javax.mail.internet.MimeMessage;
 import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -290,4 +292,11 @@ public class UserService {
         user.Activate();
         userRepository.save(user);
     }
+
+//    public Set<Wishlist> getWishList(String email) {
+//        User user = userRepository.findByEmail(email)
+//                .orElseThrow(()->new RuntimeException("not found user"));
+//
+//        return user.getWishlistSet();
+//    }
 }

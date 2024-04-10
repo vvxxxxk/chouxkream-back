@@ -1,6 +1,7 @@
 package com.kream.chouxkream.productsize.model.entity;
 
 import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.user.model.entity.Wishlist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,4 +32,7 @@ public class ProductSize {
     @ManyToOne
     @JoinColumn(name = "product_no")
     private Product product;
+
+    @ManyToOne
+    private Wishlist wishlist;
 }

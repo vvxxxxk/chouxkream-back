@@ -58,7 +58,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<UserRole> userRoles = new HashSet<>();
 
-    private Set<Wishlist> wishlist
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private Set<Wishlist> wishlistSet;
 
 
     public void encodePassword(PasswordEncoder passwordEncoder){
