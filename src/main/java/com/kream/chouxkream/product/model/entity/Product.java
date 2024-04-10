@@ -69,9 +69,11 @@ public class Product {
     @JoinColumn(name = "category_no")
     private Category category;
 
+    @Builder.Default
     @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<ProductImages> productImages = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<ProductSize> productSizes = new HashSet<>();
 }

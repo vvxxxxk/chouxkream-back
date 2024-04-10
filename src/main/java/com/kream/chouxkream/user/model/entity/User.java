@@ -1,5 +1,6 @@
 package com.kream.chouxkream.user.model.entity;
 
+import com.kream.chouxkream.bid.model.entity.Bid;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -58,6 +59,10 @@ public class User {
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<UserRole> userRoles = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    private Set<Bid> Bids = new HashSet<>();
 
 
     public void encodePassword(PasswordEncoder passwordEncoder){
