@@ -1,7 +1,15 @@
 package com.kream.chouxkream.user.service;
 
+import com.kream.chouxkream.bid.model.dto.BidStatus;
+import com.kream.chouxkream.bid.model.dto.BidType;
+import com.kream.chouxkream.bid.model.entity.Bid;
+import com.kream.chouxkream.bid.repository.BidRepository;
+import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.model.entity.ProductImages;
+import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.repository.RoleRepository;
+import com.kream.chouxkream.user.model.dto.UserBidDto;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.model.dto.UserRoleKey;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
@@ -11,6 +19,8 @@ import com.kream.chouxkream.user.repository.AuthNumberRepositroy;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -21,8 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.security.SecureRandom;
-import java.util.Optional;
-import java.util.Random;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +44,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final AuthNumberRepositroy authNumberRepositroy;
+    private final BidRepository bidRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JavaMailSender mailSender;
 
@@ -277,4 +290,58 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public Page<Bid> getPagedBuyBidByUserNo(Long userNo, LocalDate startDate, LocalDate endDate, PageRequest pageRequest) {
+
+        Date startDateTime = toDate(startDate.atStartOfDay());
+        Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.buy, BidStatus.bid_cancel, startDateTime, endDateTime, pageRequest);
+    }
+
+    public static Date toDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public List<UserBidDto> setUserBidInfo(Page<Bid> pagingBuyBid) {
+
+        List<UserBidDto> userBuyBidDtoList = new ArrayList<>();
+        for (Bid bid : pagingBuyBid) {
+
+            UserBidDto userBuyBidDto = new UserBidDto();
+            ProductSize productSize = bid.getProductSize();
+            if (productSize == null) {
+
+                continue;
+            }
+
+            Product product = productSize.getProduct();
+            if (product == null) {
+
+                continue;
+            }
+
+            Set<ProductImages> productImagesSet = product.getProductImages();
+            Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+            String imageUrl = null;
+            if (optionalProductImages.isPresent()) {
+                imageUrl = optionalProductImages.get().getImageUrl();
+            }
+
+            userBuyBidDto.setBidInfo(bid);
+            userBuyBidDto.setProductInfo(product);
+            userBuyBidDto.setProductSizeInfo(productSize);
+            userBuyBidDto.setProductImageUrl(imageUrl);
+            userBuyBidDtoList.add(userBuyBidDto);
+        }
+
+        return userBuyBidDtoList;
+    }
+
+    @Transactional
+    public Page<Bid> getPagedSellBidByUserNo(Long userNo, LocalDate startDate, LocalDate endDate, PageRequest pageRequest) {
+
+        Date startDateTime = toDate(startDate.atStartOfDay());
+        Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.sell, BidStatus.bid_cancel, startDateTime, endDateTime, pageRequest);
+    }
 }

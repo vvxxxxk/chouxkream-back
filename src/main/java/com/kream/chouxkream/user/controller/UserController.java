@@ -1,12 +1,23 @@
 package com.kream.chouxkream.user.controller;
 
+import com.kream.chouxkream.bid.model.entity.Bid;
 import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
 import com.kream.chouxkream.common.model.dto.StatusCode;
+import com.kream.chouxkream.product.model.dto.ProductDetailDto;
+import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.model.entity.ProductImages;
+import com.kream.chouxkream.product.model.entity.ProductSize;
+import com.kream.chouxkream.product.service.ProductService;
 import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -15,7 +26,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +38,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+    private final ProductService productService;
 
     @ApiOperation(value = "회원가입")
     @PostMapping("/join")
@@ -330,6 +346,70 @@ public class UserController {
 
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation(value = "회원 구매 입찰 조회")
+    @GetMapping("/me/buy")
+    public ResponseEntity<ResponseMessageDto> getBuyBidList(@RequestParam(value = "per_page", defaultValue = "10") int perPage,
+                                                         @RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                                         @RequestParam(value = "start_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                         @RequestParam(value = "end_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        Long userNo = optionalUser.get().getUserNo();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createDate");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+        Page<Bid> pagingBuyBid = userService.getPagedBuyBidByUserNo(userNo, startDate, endDate, pageRequest);
+
+        List<UserBidDto> userBidDtoList = userService.setUserBidInfo(pagingBuyBid);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("buyBidList", userBidDtoList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation(value = "회원 판매 입찰 조회")
+    @GetMapping("/me/sell")
+    public ResponseEntity<ResponseMessageDto> getSellBidList(@RequestParam(value = "per_page", defaultValue = "10") int perPage,
+                                                         @RequestParam(value = "cursor", defaultValue = "1") int cursor,
+                                                         @RequestParam(value = "start_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                         @RequestParam(value = "end_date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        Long userNo = optionalUser.get().getUserNo();
+        Sort sort = Sort.by(Sort.Direction.DESC, "createDate");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+        Page<Bid> pagingSellBid = userService.getPagedSellBidByUserNo(userNo, startDate, endDate, pageRequest);
+
+        List<UserBidDto> userBidDtoList = userService.setUserBidInfo(pagingSellBid);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("sellBidList", userBidDtoList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 }

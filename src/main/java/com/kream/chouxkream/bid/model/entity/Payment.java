@@ -35,7 +35,7 @@ public class Payment {
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bid_no")
     private Bid bid;
 }
