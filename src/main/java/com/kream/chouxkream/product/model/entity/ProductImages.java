@@ -1,4 +1,4 @@
-package com.kream.chouxkream.productimages.model.entity;
+package com.kream.chouxkream.product.model.entity;
 
 import com.kream.chouxkream.product.model.entity.Product;
 import lombok.AllArgsConstructor;

@@ -2,8 +2,7 @@ package com.kream.chouxkream.bid.model.entity;
 
 import com.kream.chouxkream.bid.model.dto.BidStatus;
 import com.kream.chouxkream.bid.model.dto.BidType;
-import com.kream.chouxkream.payment.model.entity.Payment;
-import com.kream.chouxkream.productsize.model.entity.ProductSize;
+import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.user.model.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -13,9 +13,4 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/test")
-    public void ProductTestMethod() {
-
-        productService.ProductTestMethod(3);
-    }
 }

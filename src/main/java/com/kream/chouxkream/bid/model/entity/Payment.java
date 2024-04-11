@@ -1,8 +1,7 @@
-package com.kream.chouxkream.payment.model.entity;
+package com.kream.chouxkream.bid.model.entity;
 
-import com.kream.chouxkream.bid.model.entity.Bid;
-import com.kream.chouxkream.payment.model.dto.PaymentMethod;
-import com.kream.chouxkream.payment.model.dto.PaymentStatus;
+import com.kream.chouxkream.bid.model.dto.PaymentMethod;
+import com.kream.chouxkream.bid.model.dto.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

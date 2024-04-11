@@ -1,4 +1,4 @@
-package com.kream.chouxkream.payment.model.dto;
+package com.kream.chouxkream.bid.model.dto;
 
 import lombok.Getter;
 

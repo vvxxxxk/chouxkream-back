@@ -1,4 +1,4 @@
-package com.kream.chouxkream.productsize.model.entity;
+package com.kream.chouxkream.product.model.entity;
 
 import com.kream.chouxkream.bid.model.entity.Bid;
 import com.kream.chouxkream.product.model.entity.Product;
