@@ -91,7 +91,7 @@ public class AuthController {
         response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, newRefreshToken));
 
-        StatusCode statusCode = StatusCode.JWT_TOKEN_CREATED;
+        StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
 
@@ -168,7 +168,7 @@ public class AuthController {
         response.setHeader(ACCESS_TOKEN_TYPE, newAccessToken);
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, newRefreshToken));
 
-        StatusCode statusCode = StatusCode.JWT_TOKEN_CREATED;
+        StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpServletResponse.SC_OK).body(responseMessageDto);
     }

@@ -154,6 +154,12 @@ public class UserService {
     }
 
     @Transactional
+    public boolean isNicknameExists(String updateNickname) {
+        Optional<User> optionalUser = userRepository.findByNickname(updateNickname);
+        return optionalUser.isPresent();
+    }
+
+    @Transactional
     public void updateNickname(String email, String updateNickname) {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -177,6 +183,7 @@ public class UserService {
         }
     }
 
+    @Async
     @Transactional
     public void sendTempPasswordEmail(String email) throws MessagingException {
 
@@ -219,8 +226,8 @@ public class UserService {
         SecureRandom random = new SecureRandom();
         StringBuilder password = new StringBuilder();
 
-        // 최소 8자 이상, 최대 16자 이하의 임시 비밀번호 생성
-        int length = random.nextInt(9) + 8;
+        // 최소 8자의 임시 비밀번호 생성
+        int length = 8;
 
         // 적어도 하나의 영문자, 숫자, 특수문자 를 추가
         password.append(upper.charAt(random.nextInt(upper.length())));

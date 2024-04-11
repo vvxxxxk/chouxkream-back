@@ -32,6 +32,6 @@ public class Category {
     private Timestamp updateDate;
 
     @Builder.Default
-    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Product> products = new HashSet<>();
 }

@@ -2,10 +2,7 @@ package com.kream.chouxkream.product.model.entity;
 
 import com.kream.chouxkream.bid.model.entity.Bid;
 import com.kream.chouxkream.product.model.entity.Product;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -16,6 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ProductSize {
 
     @Id
@@ -31,11 +29,11 @@ public class ProductSize {
     @Column(nullable = false)
     private int sellCount;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_no")
     private Product product;
 
     @Builder.Default
-    @OneToMany(mappedBy = "productSize", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "productSize", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Bid> bids = new HashSet<>();
 }

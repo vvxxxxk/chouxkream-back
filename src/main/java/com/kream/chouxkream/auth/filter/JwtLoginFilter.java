@@ -90,7 +90,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addCookie(createCookie(REFRESH_TOKEN_TYPE, refreshToken));
 
         ObjectMapper objectMapper = new ObjectMapper();
-        StatusCode statusCode = StatusCode.LOGIN_SUCCESS;
+        StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
@@ -117,7 +117,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         writer.print(body);
 
         // response status code
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(HttpServletResponse.SC_OK);
     }
 
     private Cookie createCookie(String key, String value) {

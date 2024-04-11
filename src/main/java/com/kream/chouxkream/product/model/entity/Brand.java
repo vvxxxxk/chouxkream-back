@@ -41,6 +41,6 @@ public class Brand {
     private boolean isActive;
 
     @Builder.Default
-    @OneToMany(mappedBy = "brand", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToMany(mappedBy = "brand", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<Product> products = new HashSet<>();
 }

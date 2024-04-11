@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum BidStatus {
 
-    BID_PROGRESS("bid_progress"),
-    BID_CANCEL("bid_cancel"),
-    BID_COMPLETE("bid_complete");
+    bid_progress("bid_progress"),
+    bid_cancel("bid_cancel"),
+    bid_complete("bid_complete");
 
     private final String status;
 

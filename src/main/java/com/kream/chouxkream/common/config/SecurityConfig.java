@@ -23,6 +23,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.util.Collections;
 import java.util.List;
@@ -104,6 +105,11 @@ public class SecurityConfig {
                 .authenticationEntryPoint(authenticationEntryPoint());      // ToDo. 권한 없는 페이지 가면 임시로 메인 페이지로 이동하도록
 
         // 필터 등록
+        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+        characterEncodingFilter.setEncoding("UTF-8");
+        characterEncodingFilter.setForceEncoding(true);
+        http
+                .addFilterBefore(characterEncodingFilter, LogoutFilter.class);
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, authService), LogoutFilter.class);
         http
