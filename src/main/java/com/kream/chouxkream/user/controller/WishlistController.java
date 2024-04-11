@@ -62,12 +62,12 @@ public class WishlistController {
             User user = userService.findByEmail(email)
                     .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            ProductSize productSize = productSizeService.getProductSizeByNo(productSizeDto.getProductNo());
+            ProductSize productSize = productSizeService.getProductSizeByNo(productSizeDto.getProductSizeNo());
             boolean isWishlistRegistered = wishlistService.updateWishlist(user, productSize);
 
             StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            responseMessageDto.addData("관심상품 등록 여부" , isWishlistRegistered);
+            responseMessageDto.addData("관심 상품 등록/해제" , isWishlistRegistered);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {

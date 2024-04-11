@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,14 +34,14 @@ public class ProductSize {
     @JoinColumn(name = "product_no")
     private Product product;
 
-    @ManyToOne // 여러개의 productsize객체들이 하나의 wishlist를 참조할수 있다.
-    private Wishlist wishlist;
+    @OneToMany(mappedBy = "productSize")// 하나의 productsize객체가 여러 wishlist를 참조할수 있다.
+    private List<Wishlist> wishlist;
 
-    public void setWishlist(Wishlist wishlist) {
-        this.wishlist = wishlist;
-    }
-
-    public Wishlist getWishlist() {
-        return wishlist;
-    }
+//    public void setWishlist(Wishlist wishlist) {
+//        this.wishlist = wishlist;
+//    }
+//
+//    public Wishlist getWishlist() {
+//        return wishlist;
+//    }
 }

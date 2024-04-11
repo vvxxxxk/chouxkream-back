@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -58,8 +59,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     private Set<UserRole> userRoles = new HashSet<>();
 
-    @OneToOne(mappedBy = "user")
-    private Wishlist wishlist;
+    @OneToMany(mappedBy = "user")
+    private List<Wishlist> wishlist;
 
     public void encodePassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(password);

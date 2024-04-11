@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
-    @Query("SELECT w FROM Wishlist w WHERE w.userNo = :userNo ")
+    @Query("SELECT w FROM Wishlist w WHERE w.user.userNo = :userNo ")
     List<Wishlist> findAllByUserNo(@Param("userNo") Long userNo);
 
     boolean existsByUserAndProductSize(User user, ProductSize productSize);

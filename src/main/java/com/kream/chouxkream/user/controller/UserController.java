@@ -377,10 +377,11 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        String email = authentication.getName();
         String email = "test@test.com";
-
+        User user = userService.findByEmail(email).get();
+        System.out.println(user.getEmail());
        try  {
-           User user = userService.findByEmail(email)
-                   .orElseThrow(() -> new ResourceNotFoundException("not found user"));
+//           User user = userService.findByEmail(email)
+//                   .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
            UserInfoDto userInfoDto = new UserInfoDto(user);
            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
