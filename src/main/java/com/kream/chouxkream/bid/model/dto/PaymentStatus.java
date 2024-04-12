@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum PaymentStatus {
 
-    PAYMENT_PROGRESS("payment_progress"),
-    PAYMENT_CANCEL("payment_cancel"),
-    PAYMENT_COMPLETE("payment_complete");
+    payment_progress("payment_progress"),
+    payment_cancel("payment_cancel"),
+    payment_complete("payment_complete");
 
     private final String status;
 

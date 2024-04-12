@@ -32,6 +32,7 @@ public class Bid {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Setter
     private BidStatus bidStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,7 +43,7 @@ public class Bid {
     @JoinColumn(name = "product_size_no")
     private ProductSize productSize;
 
-//    @OneToOne(mappedBy = "bid", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
-//    private Payment payment;
+    @OneToOne(mappedBy = "bid", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private Payment payment;
 }
 

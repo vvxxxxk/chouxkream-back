@@ -3,10 +3,6 @@ package com.kream.chouxkream.user.controller;
 import com.kream.chouxkream.bid.model.entity.Bid;
 import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
 import com.kream.chouxkream.common.model.dto.StatusCode;
-import com.kream.chouxkream.product.model.dto.ProductDetailDto;
-import com.kream.chouxkream.product.model.entity.Product;
-import com.kream.chouxkream.product.model.entity.ProductImages;
-import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.product.service.ProductService;
 import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.User;
@@ -15,7 +11,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -27,10 +22,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -410,6 +403,74 @@ public class UserController {
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("sellBidList", userBidDtoList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation("회원 입찰 정보 상세 조회")
+    @GetMapping("/me/bid/{bid_no}")
+    public ResponseEntity<ResponseMessageDto> getBidDetail(@PathVariable("bid_no") Long bidNo) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        // 결제 정보 조회
+        Optional<Bid> optionalBid = userService.getBuyBidByBidNo(bidNo);
+        if (optionalBid.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        Bid bid = optionalBid.get();
+        UserBidDetailDto userBidDetailDto = userService.setUserBidDetailInfo(bid);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("buyBidDetail", userBidDetailDto);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+    }
+
+    @ApiOperation("회원 입찰 정보 삭제")
+    @DeleteMapping("/me/bid/{bid_no}")
+    public ResponseEntity<ResponseMessageDto> deleteBid(@PathVariable("bid_no") Long bidNo) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        // 결제 정보 조회
+        Optional<Bid> optionalBid = userService.getBuyBidByBidNo(bidNo);
+        if (optionalBid.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+        Bid bid = optionalBid.get();
+
+        userService.deleteBid(bid);
+
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 }

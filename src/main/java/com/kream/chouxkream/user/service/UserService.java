@@ -3,15 +3,18 @@ package com.kream.chouxkream.user.service;
 import com.kream.chouxkream.bid.model.dto.BidStatus;
 import com.kream.chouxkream.bid.model.dto.BidType;
 import com.kream.chouxkream.bid.model.entity.Bid;
+import com.kream.chouxkream.bid.model.entity.Payment;
 import com.kream.chouxkream.bid.repository.BidRepository;
 import com.kream.chouxkream.product.model.entity.Product;
 import com.kream.chouxkream.product.model.entity.ProductImages;
 import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.repository.RoleRepository;
+import com.kream.chouxkream.user.model.dto.UserBidDetailDto;
 import com.kream.chouxkream.user.model.dto.UserBidDto;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.model.dto.UserRoleKey;
+import com.kream.chouxkream.user.model.entity.Address;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.UserRole;
@@ -295,7 +298,7 @@ public class UserService {
 
         Date startDateTime = toDate(startDate.atStartOfDay());
         Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
-        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.buy, BidStatus.bid_cancel, startDateTime, endDateTime, pageRequest);
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.buy, BidStatus.bid_delete, startDateTime, endDateTime, pageRequest);
     }
 
     public static Date toDate(LocalDateTime localDateTime) {
@@ -342,6 +345,54 @@ public class UserService {
 
         Date startDateTime = toDate(startDate.atStartOfDay());
         Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
-        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.sell, BidStatus.bid_cancel, startDateTime, endDateTime, pageRequest);
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.sell, BidStatus.bid_delete, startDateTime, endDateTime, pageRequest);
+    }
+
+    @Transactional
+    public Optional<Bid> getBuyBidByBidNo(Long bidNo) {
+
+        return bidRepository.findById(bidNo);
+    }
+
+    public UserBidDetailDto setUserBidDetailInfo(Bid bid) {
+
+        UserBidDetailDto userBidDetailDto = new UserBidDetailDto();
+
+        Payment payment = bid.getPayment();
+        ProductSize productSize = bid.getProductSize();
+        Product product = productSize.getProduct();
+
+        Set<ProductImages> productImagesSet = product.getProductImages();
+        Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+        String imageUrl = null;
+        if (optionalProductImages.isPresent()) {
+            imageUrl = optionalProductImages.get().getImageUrl();
+        }
+
+        User user = bid.getUser();
+        Set<Address> addressSet = user.getAddresses();
+        Optional<Address> optionalAddress = addressSet.stream().findFirst();
+        Address address = null;
+        if (optionalAddress.isEmpty()) {
+
+            return null;
+        }
+        address = optionalAddress.get();
+
+        userBidDetailDto.setBidInfo(bid);
+        userBidDetailDto.setProductInfo(product);
+        userBidDetailDto.setProductSizeInfo(productSize);
+        userBidDetailDto.setProductImageUrl(imageUrl);
+        userBidDetailDto.setAddressInfo(address);
+        userBidDetailDto.setPaymentInfo(payment);
+
+        return userBidDetailDto;
+    }
+
+    @Transactional
+    public void deleteBid(Bid bid) {
+
+        bid.setBidStatus(BidStatus.bid_delete);
+        bidRepository.save(bid);
     }
 }

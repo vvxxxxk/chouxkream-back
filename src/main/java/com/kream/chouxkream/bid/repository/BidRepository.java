@@ -20,11 +20,5 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     @Query("SELECT MAX(b.bidPrice) FROM Bid b WHERE b.productSize.productSizeNo = :productSizeNo AND b.bidType = 'buy'")
     Integer findMaxBidPriceByProductSizeNo(Long productSizeNo);
 
-    @Query("SELECT b FROM Bid b WHERE b.user.userNo = :userNo AND b.bidType = 'buy' AND b.bidStatus != 'bid_delete'")
-    List<Bid> findBuyBidListByUserNo(Long userNo);
-
-    Page<Bid> findByUserUserNoAndBidTypeAndBidStatusNot(Long userNo, BidType bidType, BidStatus bidStatus, Pageable pageable);
-
     Page<Bid> findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(Long userNo, BidType bidType, BidStatus bidStatus, Date startDate, Date endDate, Pageable pageable);
-
 }
