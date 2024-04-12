@@ -27,4 +27,5 @@ public class SearchDTO {
 
     private int pagingSize;
 
+    private String userId;
 }

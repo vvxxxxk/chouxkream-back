@@ -6,6 +6,8 @@ import com.kream.chouxkream.product.service.ProductService;
 import io.swagger.models.auth.In;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -53,7 +55,21 @@ public class ProductController {
     }
 
     @GetMapping("/api/search/recent-keyword")
-    public void searchRecentKeyword(){
+    public ResponseEntity<ResponseMessage> searchRecentKeyword(){
+        ResponseMessage responseMessage = new ResponseMessage(200, "keyword search complete", null);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        responseMessage.addData("keyword", productService.getRecentSearches(email));
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
+    }
 
+    @PostMapping("/api/search/recent-keyword")
+    public ResponseEntity<ResponseMessage> saveRecentKeyword(@RequestBody SearchDTO searchDTO){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        productService.saveRecentSearches(email,searchDTO.getKeyword());
+        ResponseMessage responseMessage = new ResponseMessage(200, "keyword save complete", null);
+        responseMessage.addData("date", null);
+        return ResponseEntity.status(responseMessage.getStatusCode()).body(responseMessage);
     }
 }

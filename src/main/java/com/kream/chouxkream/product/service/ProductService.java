@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.connection.RedisZSetCommands.Range;
 import org.springframework.data.redis.connection.RedisZSetCommands.Limit;
@@ -28,7 +30,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private static final String POPULAR_SEARCH_KEY = "popular_searches";
     private static final String SEARCH_KEY = "search_autocomplete";
-    private static final String RECENT_SEARCH_KEY = "search_autocomplete";
+    private static final String RECNET_SEARCH_KEY = "recent_searches";
+    private static final int RECENT_SEARCH_KEY_SIZE = 10;
     private final RedisTemplate<String, Object> redisTemplate;
 
 // 인덱싱, 클린코딩
@@ -80,5 +83,25 @@ public class ProductService {
         return redisTemplate.opsForZSet().rangeByLex(SEARCH_KEY, range, limit);
     }
 
+    public void saveRecentSearches(String email, String keyword){
+        // to Do 1. user 확인
+        String key = RECNET_SEARCH_KEY+email;
+        Long size = redisTemplate.opsForList().size(key);
+        if(size == (long) RECENT_SEARCH_KEY_SIZE){
+            redisTemplate.opsForList().rightPop(key);
+        }
+        redisTemplate.opsForList().leftPush(key, keyword);
+        System.out.println("size : "+size);
+        System.out.println(email);
+        System.out.println(keyword);
+    }
+    public List<Object> getRecentSearches(String email){
+        String key = RECNET_SEARCH_KEY+email;
+        Long size = redisTemplate.opsForList().size(key);
+        System.out.println("size : "+size);
+        System.out.println(key);
+        long endIndex = Math.min(size - 1, RECENT_SEARCH_KEY_SIZE - 1);
+        return redisTemplate.opsForList().range(key, 0, endIndex);
+    }
 
 }
