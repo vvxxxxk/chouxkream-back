@@ -1,4 +1,4 @@
-package com.kream.chouxkream.product;
+package com.kream.chouxkream.product.repository;
 
 import com.kream.chouxkream.product.model.entity.Brand;
 import com.kream.chouxkream.product.model.entity.Product;

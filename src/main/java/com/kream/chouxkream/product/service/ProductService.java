@@ -1,6 +1,6 @@
 package com.kream.chouxkream.product.service;
 
-import com.kream.chouxkream.product.ProductSpecification;
+import com.kream.chouxkream.product.repository.ProductSpecification;
 import com.kream.chouxkream.product.model.dto.SearchDTO;
 import com.kream.chouxkream.product.model.dto.SearchResultDTO;
 import com.kream.chouxkream.product.model.entity.Product;
@@ -14,8 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.data.redis.connection.RedisZSetCommands.Range;
 import org.springframework.data.redis.connection.RedisZSetCommands.Limit;
