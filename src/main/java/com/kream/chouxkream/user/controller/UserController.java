@@ -342,7 +342,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
-    @ApiOperation(value = "회원 구매 입찰 조회")
+    @ApiOperation(value = "회원 구매 입찰 내역 조회")
     @GetMapping("/me/buy")
     public ResponseEntity<ResponseMessageDto> getBuyBidList(@RequestParam(value = "per_page", defaultValue = "10") int perPage,
                                                          @RequestParam(value = "cursor", defaultValue = "1") int cursor,
@@ -362,8 +362,10 @@ public class UserController {
         }
 
         Long userNo = optionalUser.get().getUserNo();
+
         Sort sort = Sort.by(Sort.Direction.DESC, "createDate");
         PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
         Page<Bid> pagingBuyBid = userService.getPagedBuyBidByUserNo(userNo, startDate, endDate, pageRequest);
 
         List<UserBidDto> userBidDtoList = userService.setUserBidInfo(pagingBuyBid);
@@ -374,7 +376,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
-    @ApiOperation(value = "회원 판매 입찰 조회")
+    @ApiOperation(value = "회원 판매 입찰 내역 조회")
     @GetMapping("/me/sell")
     public ResponseEntity<ResponseMessageDto> getSellBidList(@RequestParam(value = "per_page", defaultValue = "10") int perPage,
                                                          @RequestParam(value = "cursor", defaultValue = "1") int cursor,
