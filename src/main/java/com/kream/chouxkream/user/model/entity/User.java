@@ -7,6 +7,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +27,7 @@ public class User {
     private Long userNo;
 
     @Column(nullable = false, unique = true, length = 20)
+    @Email
     private String email;
 
     @Column(nullable = false)

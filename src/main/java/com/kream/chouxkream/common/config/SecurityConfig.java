@@ -98,7 +98,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .antMatchers("/all", "/api/**", "/api/auth/**", "/api/users/**", "/api/products/**").permitAll()
                         .antMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
-                        .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
+                        .antMatchers("/user", "/my","/api/search/recent-keyword").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling()

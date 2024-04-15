@@ -1,6 +1,5 @@
 package com.kream.chouxkream.product.model.entity;
 
-import com.kream.chouxkream.product.model.entity.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
