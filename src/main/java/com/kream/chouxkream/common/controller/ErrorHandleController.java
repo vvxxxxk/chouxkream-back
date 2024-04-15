@@ -84,7 +84,7 @@ public class ErrorHandleController {
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public ResponseEntity<?> exceptionHandler(IllegalArgumentException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage()+"fd");
         return new ResponseEntity<>(ErrorMessageDto.builder()
                 .code(HttpStatus.BAD_REQUEST.value())
                 .message(e.getMessage())

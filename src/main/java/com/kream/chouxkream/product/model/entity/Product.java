@@ -1,17 +1,15 @@
 package com.kream.chouxkream.product.model.entity;
 
-import com.kream.chouxkream.brand.model.entity.Brand;
-import com.kream.chouxkream.category.model.entity.Category;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 import java.sql.Timestamp;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
-@Setter // 컬럼 당 setter 배정
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
@@ -60,4 +58,7 @@ public class Product {
     @ManyToOne
     @JoinColumn(name="category_no")
     private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    private Set<ProductImages> productImages;
 }

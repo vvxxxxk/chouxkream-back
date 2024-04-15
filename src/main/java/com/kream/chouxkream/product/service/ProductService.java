@@ -2,7 +2,9 @@ package com.kream.chouxkream.product.service;
 
 import com.kream.chouxkream.product.ProductSpecification;
 import com.kream.chouxkream.product.model.dto.SearchDTO;
+import com.kream.chouxkream.product.model.dto.SearchResultDTO;
 import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.repository.ProductImagesRepository;
 import com.kream.chouxkream.product.repository.ProductMapping;
 import com.kream.chouxkream.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.data.redis.connection.RedisZSetCommands.Range;
 import org.springframework.data.redis.connection.RedisZSetCommands.Limit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductImagesRepository productImagesRepository;
     private static final String POPULAR_SEARCH_KEY = "popular_searches";
     private static final String SEARCH_KEY = "search_autocomplete";
     private static final String RECNET_SEARCH_KEY = "recent_searches";
@@ -36,8 +37,8 @@ public class ProductService {
 
 // 인덱싱, 클린코딩
 
-    public Page<Product> search(SearchDTO searchDTO){
-        Pageable pageable = PageRequest.of(searchDTO.getPagingIndex(),searchDTO.getPagingSize());
+    public Page<SearchResultDTO> search(SearchDTO searchDTO){
+        Pageable pageable = PageRequest.of(searchDTO.getPagingIndex()-1,searchDTO.getPagingSize());
         Specification<Product> spec = (root, query, criteriaBuilder) -> null;
         if (searchDTO.getKeyword() != null) { // 키워드 검색
             spec = spec.and(ProductSpecification.searchKeyword(searchDTO.getKeyword()));
@@ -51,10 +52,23 @@ public class ProductService {
         if(searchDTO.getSort() != null)
             spec = spec.and(ProductSpecification.sort(searchDTO.getSort()));
         Page<Product> list = productRepository.findAll(spec, pageable);
+
         if(!list.isEmpty()&&searchDTO.getKeyword() != null){
             redisTemplate.opsForZSet().incrementScore(POPULAR_SEARCH_KEY, searchDTO.getKeyword(), 1);// 인기 검색어 선정을 위한
         }
-        return list;
+        //return list;
+        return list.map(product -> {
+            List<String> imageUrls = productImagesRepository.findImageUrlListByProductNo(product.getProductNo());
+            List<String> productImageUrls = (imageUrls.isEmpty()) ? Collections.emptyList() : imageUrls;
+            return new SearchResultDTO(
+                    product.getProductNo(),
+                    product.getProductTitle(),
+                    product.getProductSubTitle(),
+                    product.getReleasePrice(),
+                    product.getBrand().getBrandName(),
+                    productImageUrls
+            );
+        });
     }
 
     public List<String> getPopularSearches() {

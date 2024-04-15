@@ -1,4 +1,4 @@
-package com.kream.chouxkream.category.model.entity;
+package com.kream.chouxkream.product.model.entity;
 
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -14,13 +14,18 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
-public class Category {
+public class Brand {
     @Id
-    private Integer categoryNo;
+    private String brandId;
 
     @Column(nullable = false)
-    private String categoryName;
+    private String brandName;
 
+    @Column(nullable = false, name="brand_logo_url")
+    private String logo;
+
+    @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
+    private boolean isActive;
 
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createDate;
@@ -28,4 +33,6 @@ public class Category {
     @Column(nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Timestamp updateDate;
 
+    @Column(nullable = false, name ="brand_sub_name")
+    private String subName;
 }

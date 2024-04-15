@@ -1,13 +1,12 @@
 package com.kream.chouxkream.product;
 
-import com.kream.chouxkream.brand.model.entity.Brand;
+import com.kream.chouxkream.product.model.entity.Brand;
 import com.kream.chouxkream.product.model.entity.Product;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.*;
 import java.util.List;
-import java.util.function.Predicate;
 
 
 public class ProductSpecification {
