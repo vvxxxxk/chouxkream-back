@@ -17,12 +17,12 @@ public class Wishlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long wishlistNo;
 
-//    @Setter
+
     @ManyToOne
     @JoinColumn(name = "user_no")
     private User user;
 
-//    @Setter
+
     @ManyToOne
     @JoinColumn(name = "product_size_no")
     private ProductSize productSize;

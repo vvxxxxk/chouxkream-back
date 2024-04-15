@@ -55,7 +55,7 @@ public class WishlistController {
     @PostMapping
     public ResponseEntity<ResponseMessageDto> addOrDeleteWishList(@RequestBody ProductSizeDto productSizeDto){ //토글//product Size No?받아와야함.
         //if userno가 wishlist에 잇으면 해제. 없으면 등록.
-       // String email = getSiteUserEmail();
+//        String email = getSiteUserEmail();
         String email = "ee121111@test.com";
         try {
 
@@ -67,7 +67,8 @@ public class WishlistController {
 
             StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            responseMessageDto.addData("관심 상품 등록/해제" , isWishlistRegistered);
+            responseMessageDto.addData("isWishlistRegistered" , isWishlistRegistered); // 상품정보..
+            responseMessageDto.addData("productSizeNo" , productSizeDto.getProductSizeNo());
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {
