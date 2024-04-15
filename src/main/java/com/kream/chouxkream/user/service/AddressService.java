@@ -76,4 +76,10 @@ public class AddressService {
         return userAddressDtoList;
     }
 
+    public void deleteAddress(Long addressNo) throws ResourceNotFoundException{
+        Address address = addressRepository.findById(addressNo)
+                .orElseThrow(()->new ResourceNotFoundException("not found address."));
+        addressRepository.delete(address);
+    }
+
 }

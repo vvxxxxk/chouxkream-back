@@ -2,7 +2,6 @@ package com.kream.chouxkream.user.controller;
 
 import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
 import com.kream.chouxkream.common.model.dto.StatusCode;
-import com.kream.chouxkream.productsize.ProductSize;
 import com.kream.chouxkream.user.ResourceNotFoundException;
 import com.kream.chouxkream.user.model.dto.AddressDto;
 import com.kream.chouxkream.user.model.entity.Address;
@@ -45,7 +44,7 @@ public class AddressController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
@@ -74,7 +73,7 @@ public class AddressController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
@@ -97,7 +96,7 @@ public class AddressController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
@@ -119,11 +118,34 @@ public class AddressController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
         } catch (ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
     }
+
+    @ApiOperation(value = "배송지 삭제")
+    @DeleteMapping
+    public ResponseEntity<ResponseMessageDto> deleteAddress(@RequestParam("address_no") Long addressNo) {
+        //        String email = getSiteUserEmail();
+        String email = "ee121111@test.com";
+        try {
+            User user = userService.findByEmail(email)
+                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
+
+            addressService.deleteAddress(addressNo);
+
+            StatusCode statusCode = StatusCode.FIND_USER_SUCCESS;
+            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+
+        } catch (ResourceNotFoundException ex) {
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+    }
+
 
 
 
