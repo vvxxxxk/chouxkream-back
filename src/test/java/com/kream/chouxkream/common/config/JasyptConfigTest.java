@@ -25,7 +25,7 @@ class JasyptConfigTest extends JasyptConfig{
         assertThat(plainText).isEqualTo(decryptedText);
     }
 
-<<<<<<< HEAD
+
     @Test
     public void stringEncryptor() {
 
@@ -44,6 +44,5 @@ class JasyptConfigTest extends JasyptConfig{
 
         assertThat(plainText).isEqualTo(decryptedText);
     }
-=======
->>>>>>> develop
+
 }
