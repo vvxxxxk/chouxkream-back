@@ -17,5 +17,5 @@ public class AddressDto {
     private String zipcode; //필수
     private String address; //필수
     private String detailAddress; //필수 X
-    private boolean defaultAddress; //null이면 false? w자동으로 false인가보네
+    private boolean defaultAddress;
 }

@@ -493,6 +493,7 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
+
         // 사용자 조회
         Optional<User> optionalUser = userService.findByEmail(email);
         if (optionalUser.isEmpty()) {
@@ -667,7 +668,6 @@ public class UserController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-
 
         // 사용자 조회
         Optional<User> optionalUser = userService.findByEmail(email);

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +27,12 @@ public class AddressService {
         address.setReceiverPhone(addressDto.getReceiverPhone());
         address.setZipcode(addressDto.getZipcode());
         address.setAddress(addressDto.getAddress());
-        address.setDefaultAddress(addressDto.isDefaultAddress());
-        if (addressDto.getDetailAddress() == null || addressDto.getDetailAddress().isBlank()) {
-            address.unFilleddetailAddress();
-            addressRepository.save(address);
-        } else {
-            address.setDetailAddress(addressDto.getDetailAddress());
-            addressRepository.save(address);
+        if (addressDto.isDefaultAddress()) {
+            unSetDefaultAddress(user.getUserNo());
         }
+        address.setDefaultAddress(addressDto.isDefaultAddress());
+        address.setDetailAddress(address.getDetailAddress());
+        addressRepository.save(address);
     }
 
     @Transactional
@@ -43,6 +42,9 @@ public class AddressService {
         address.setReceiverPhone(newaddressDto.getReceiverPhone());
         address.setZipcode(newaddressDto.getZipcode());
         address.setAddress(newaddressDto.getAddress());
+        if (newaddressDto.isDefaultAddress()) {
+            unSetDefaultAddress(address.getUser().getUserNo());
+        }
         address.setDefaultAddress(newaddressDto.isDefaultAddress());
         address.setDetailAddress(newaddressDto.getDetailAddress());
         addressRepository.save(address);
@@ -52,6 +54,7 @@ public class AddressService {
     public void setDefaultAddress(Long addressNo) {
         Address address = addressRepository.findById(addressNo).get();
         if (!address.isDefaultAddress()) {
+            unSetDefaultAddress(address.getUser().getUserNo());
             address.setDefaultAddress(true);
             addressRepository.save(address);
         }
@@ -84,6 +87,31 @@ public class AddressService {
     public void deleteAddress(Long addressNo){
         Address address = addressRepository.findById(addressNo).get();
         addressRepository.delete(address);
+    }
+
+    public Address getMyDefaultAddress(Long userNo) { //없으면? 냅두고 잇으면 바꾸는거.
+        return this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo)
+                .orElse(null);
+    }
+
+//    public void unSetDefaultAddress(Long userNo) {
+//        Optional<Address> defaultAddress = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
+//        defaultAddress.ifPresent( myDefaultAddress -> {
+//            myDefaultAddress.setDefaultAddress(false);
+//            this.addressRepository.save(myDefaultAddress);
+//        });
+////        if (myDefaultAddress.isPresent()){
+////            myDefaultAddress.get().setDefaultAddress(false);
+////            this.addressRepository.save(myDefaultAddress.get());
+////        }
+//    }
+
+    public void unSetDefaultAddress(Long userNo) {
+        Optional<Address> myDefaultAddressOptional = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
+        myDefaultAddressOptional.ifPresent(myDefaultAddress -> {
+            myDefaultAddress.setDefaultAddress(false);
+            this.addressRepository.save(myDefaultAddress);
+        });
     }
 
 }

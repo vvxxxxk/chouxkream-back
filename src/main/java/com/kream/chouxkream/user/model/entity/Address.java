@@ -38,7 +38,4 @@ public class Address {
     @JoinColumn(name = "user_no")
     private User user;
 
-    public void unFilleddetailAddress() {
-        this.detailAddress = "Unfilled address details.";
-    }
 }
