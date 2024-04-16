@@ -6,11 +6,11 @@ import com.kream.chouxkream.common.model.dto.StatusCode;
 import com.kream.chouxkream.product.model.dto.ProductSizeDto;
 import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.product.service.ProductSizeService;
-import com.kream.chouxkream.user.ResourceNotFoundException;
 import com.kream.chouxkream.product.service.ProductService;
 import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.Address;
 import com.kream.chouxkream.user.model.entity.User;
+import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.service.AddressService;
 import com.kream.chouxkream.user.service.UserService;
 import com.kream.chouxkream.user.service.WishlistService;
@@ -488,25 +488,25 @@ public class UserController {
 
     @ApiOperation(value = "포인트 조회")
     @GetMapping("/me/point")
-    public ResponseEntity<ResponseMessageDto> getPoints() { // 입력 매개변수로 포인트적립쿠폰? 입력 받아오는거 넣기. 필수 X.
+    public ResponseEntity<ResponseMessageDto> getPoints() {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        User user = userService.findByEmail(email).get();
-        try  {
 
-            UserInfoDto userInfoDto = new UserInfoDto(user);
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            responseMessageDto.addData("point", userInfoDto.getPoint());
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch (ResourceNotFoundException ex){
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        UserInfoDto userInfoDto = new UserInfoDto(optionalUser.get());
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("point", userInfoDto.getPoint());
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
     @ApiOperation(value = "회원 탈퇴") //비활성화
@@ -516,23 +516,21 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        try {
-
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
-
-            userService.DeActivateUser(email);
-
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch(ResourceNotFoundException ex) {
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        userService.DeActivateUser(email);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+
     }
 
     //=========================================== 배송지 ======================================================================================
@@ -541,120 +539,122 @@ public class UserController {
     @ApiOperation(value = "회원 배송지 추가")
     @PostMapping("/me/address")
     public ResponseEntity<ResponseMessageDto> addAddress(@RequestBody AddressDto addressDto) {
-        //        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            addressService.addAddress(user, addressDto);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch (ResourceNotFoundException ex) {
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        addressService.addAddress(optionalUser.get(), addressDto);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
     @ApiOperation(value = "회원 배송지 조회")
     @GetMapping("/me/address")
     public ResponseEntity<ResponseMessageDto> getAddressList(@RequestParam(value = "per_page", defaultValue = "10") int perPage,
                                                              @RequestParam(value = "cursor", defaultValue = "1")int cursor) {
-        //        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            Sort sort = Sort.by(Sort.Direction.DESC,"addressNo");
-            PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-            Page<Address> pagingAddress = addressService.getPagedAddressesByUser(user,pageRequest);
-
-            List<AddressDto> addressDtoList = addressService.setAddressDto(pagingAddress);
-
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            responseMessageDto.addData("addressList", addressDtoList);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch (ResourceNotFoundException ex) {
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        Sort sort = Sort.by(Sort.Direction.DESC,"addressNo");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+
+        Page<Address> pagingAddress = addressService.getPagedAddressesByUser(optionalUser.get(),pageRequest);
+
+        List<AddressDto> addressDtoList = addressService.setAddressDto(pagingAddress);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        responseMessageDto.addData("addressList", addressDtoList);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
     }
 
     @ApiOperation(value = "회원 배송지 수정")
     @PatchMapping("/me/address/{address_no}")
     public ResponseEntity<ResponseMessageDto> updateAddress(@RequestBody AddressDto newaddressDto, @PathVariable("address_no") Long addressNo) {
-        //        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            addressService.updateAddress(addressNo, newaddressDto);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-        } catch (ResourceNotFoundException ex) {
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+        addressService.updateAddress(addressNo, newaddressDto);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
     @ApiOperation(value = "회원 기본배송지 설정")
     @PatchMapping("/me/address/{address_no}/default")
     public ResponseEntity<ResponseMessageDto> setDefaultAddress(@PathVariable("address_no") Long addressNo) {
 
-        //        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            addressService.setDefaultAddress(addressNo);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch (ResourceNotFoundException ex) {
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        addressService.setDefaultAddress(addressNo);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+
     }
 
     @ApiOperation(value = "배송지 삭제")
     @DeleteMapping("/me/address")
     public ResponseEntity<ResponseMessageDto> deleteAddress(@RequestParam("address_no") Long addressNo) {
-        //        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            addressService.deleteAddress(addressNo);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-        } catch (ResourceNotFoundException ex) {
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+        addressService.deleteAddress(addressNo);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
 
@@ -662,56 +662,66 @@ public class UserController {
 
     @ApiOperation(value = "관심 상품 조회")
     @GetMapping("/me/wishlist")
-    public ResponseEntity<ResponseMessageDto> getWishLists () {
-        String email = getSiteUserEmail();
-//        String email = "ee121111@test.com";
-        try {
+    public ResponseEntity<ResponseMessageDto> getWishLists (@RequestParam(value = "per_page", defaultValue = "10") int perPage,
+                                                            @RequestParam(value = "cursor", defaultValue = "1")int cursor) {
 
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
-
-//            Set<Wishlist> myWishList = user.getWishlistSet();
-//          wishlist 에 productsize들 각각 이름,사진 가격 꺼내와야함 String으로?
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            //프로덕트사이즈리스폰스해야댐ㅅㅂ 디티오로?
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        } catch(ResourceNotFoundException ex) {
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
+
+
+        Sort sort = Sort.by(Sort.Direction.DESC,"productSizeNo");
+        PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
+        // wishlist에 잇는 userno 추출 하고, 거기 해당하는 productsize 다시 리스트 추가해야함.
+        List<Wishlist> myWishList = wishlistService.getUserWishList(optionalUser.get());
+        List<ProductSize> myWishProductSizes = productSizeService.getMyWishListProductSizes(myWishList);
+
+        Page<ProductSize> pagingProductSize = productSizeService.getPagedProductSizes(myWishProductSizes, pageRequest);
+        List<ProductSizeDto> productSizeDtoList = productSizeService.setProductSizeDto(pagingProductSize);
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+//        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+//        responseMessageDto.addData("productSizeDtoList", productSizeDtoList);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("productSizeDtoList", productSizeDtoList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
     @ApiOperation(value = "관심 상품 등록/해제")
     @PostMapping("/me/wishlist")
     public ResponseEntity<ResponseMessageDto> addOrDeleteWishList(@RequestBody ProductSizeDto productSizeDto){ //토글//product Size No?받아와야함.
         //if userno가 wishlist에 잇으면 해제. 없으면 등록.
-//        String email = getSiteUserEmail();
-        String email = "ee121111@test.com";
-        try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-            User user = userService.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("not found user"));
 
-            ProductSize productSize = productSizeService.getProductSizeByNo(productSizeDto.getProductSizeNo());
-            boolean isWishlistRegistered = wishlistService.updateWishlist(user, productSize);
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
 
-            StatusCode statusCode = StatusCode.SUCCESS;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-            responseMessageDto.addData("isWishlistRegistered" , isWishlistRegistered); // 상품정보..
-            responseMessageDto.addData("productSizeNo" , productSizeDto.getProductSizeNo());
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-
-        } catch (ResourceNotFoundException ex) {
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
-            ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
+        ProductSize productSize = productSizeService.getProductSizeByNo(productSizeDto.getProductSizeNo());
+        boolean isWishlistRegistered = wishlistService.updateWishlist(optionalUser.get(), productSize);
 
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        responseMessageDto.addData("isWishlistRegistered" , isWishlistRegistered); // 상품정보..
+        responseMessageDto.addData("productSizeNo" , productSizeDto.getProductSizeNo());
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
     private ResponseMessageDto setResponseMessageDto (StatusCode statusCode) {
@@ -720,9 +730,5 @@ public class UserController {
         responseMessageDto.setCode(statusCode.getCode());
         responseMessageDto.setMessage(statusCode.getMessage());
         return responseMessageDto;
-    }
-    private String getSiteUserEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
     }
 }

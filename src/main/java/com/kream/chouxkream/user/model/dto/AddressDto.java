@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Setter
 public class AddressDto {
 
+    private Long addressNo; //필수
     private String receiverName; //필수
     private String receiverPhone; //필수
     private String zipcode; //필수

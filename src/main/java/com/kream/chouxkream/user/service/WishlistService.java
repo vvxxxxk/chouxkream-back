@@ -6,6 +6,7 @@ import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class WishlistService {
         return this.wishListRepository.findAllByUserNo(user.getUserNo());
     }
 
+    @Transactional
     public boolean updateWishlist (User user, ProductSize productSize) {
         if (!wishListRepository.existsByUserAndProductSize(user, productSize)){ //없으면 추가
 
