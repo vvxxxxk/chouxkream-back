@@ -1,17 +1,29 @@
 package com.kream.chouxkream.user.service;
 
+import com.kream.chouxkream.bid.model.dto.BidStatus;
+import com.kream.chouxkream.bid.model.dto.BidType;
+import com.kream.chouxkream.bid.model.entity.Bid;
+import com.kream.chouxkream.bid.model.entity.Payment;
+import com.kream.chouxkream.bid.repository.BidRepository;
+import com.kream.chouxkream.product.model.entity.Product;
+import com.kream.chouxkream.product.model.entity.ProductImages;
+import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.repository.RoleRepository;
+import com.kream.chouxkream.user.model.dto.UserBidDetailDto;
+import com.kream.chouxkream.user.model.dto.UserBidDto;
 import com.kream.chouxkream.user.model.dto.UserJoinDto;
 import com.kream.chouxkream.user.model.dto.UserRoleKey;
+import com.kream.chouxkream.user.model.entity.Address;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.UserRole;
-import com.kream.chouxkream.user.model.entity.Wishlist;
 import com.kream.chouxkream.user.repository.AuthNumberRepositroy;
 import com.kream.chouxkream.user.repository.UserRepository;
 import com.kream.chouxkream.user.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -25,15 +37,21 @@ import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+
 public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final AuthNumberRepositroy authNumberRepositroy;
+    private final BidRepository bidRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JavaMailSender mailSender;
 
@@ -156,6 +174,12 @@ public class UserService {
     }
 
     @Transactional
+    public boolean isNicknameExists(String updateNickname) {
+        Optional<User> optionalUser = userRepository.findByNickname(updateNickname);
+        return optionalUser.isPresent();
+    }
+
+    @Transactional
     public void updateNickname(String email, String updateNickname) {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -179,6 +203,7 @@ public class UserService {
         }
     }
 
+    @Async
     @Transactional
     public void sendTempPasswordEmail(String email) throws MessagingException {
 
@@ -221,8 +246,8 @@ public class UserService {
         SecureRandom random = new SecureRandom();
         StringBuilder password = new StringBuilder();
 
-        // 최소 8자 이상, 최대 16자 이하의 임시 비밀번호 생성
-        int length = random.nextInt(9) + 8;
+        // 최소 8자의 임시 비밀번호 생성
+        int length = 8;
 
         // 적어도 하나의 영문자, 숫자, 특수문자 를 추가
         password.append(upper.charAt(random.nextInt(upper.length())));
@@ -293,10 +318,106 @@ public class UserService {
         userRepository.save(user);
     }
 
-//    public Set<Wishlist> getWishList(String email) {
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(()->new RuntimeException("not found user"));
-//
-//        return user.getWishlistSet();
-//    }
+    @Transactional
+    public Page<Bid> getPagedBuyBidByUserNo(Long userNo, LocalDate startDate, LocalDate endDate, PageRequest pageRequest) {
+
+        Date startDateTime = toDate(startDate.atStartOfDay());
+        Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.buy, BidStatus.bid_delete, startDateTime, endDateTime, pageRequest);
+    }
+
+    public static Date toDate(LocalDateTime localDateTime) {
+        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    public List<UserBidDto> setUserBidInfo(Page<Bid> pagingBuyBid) {
+
+        List<UserBidDto> userBuyBidDtoList = new ArrayList<>();
+        for (Bid bid : pagingBuyBid) {
+
+            UserBidDto userBuyBidDto = new UserBidDto();
+            ProductSize productSize = bid.getProductSize();
+            if (productSize == null) {
+
+                continue;
+            }
+
+            Product product = productSize.getProduct();
+            if (product == null) {
+
+                continue;
+            }
+
+            Set<ProductImages> productImagesSet = product.getProductImages();
+            Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+            String imageUrl = null;
+            if (optionalProductImages.isPresent()) {
+                imageUrl = optionalProductImages.get().getImageUrl();
+            }
+
+            userBuyBidDto.setBidInfo(bid);
+            userBuyBidDto.setProductInfo(product);
+            userBuyBidDto.setProductSizeInfo(productSize);
+            userBuyBidDto.setProductImageUrl(imageUrl);
+            userBuyBidDtoList.add(userBuyBidDto);
+        }
+
+        return userBuyBidDtoList;
+    }
+
+    @Transactional
+    public Page<Bid> getPagedSellBidByUserNo(Long userNo, LocalDate startDate, LocalDate endDate, PageRequest pageRequest) {
+
+        Date startDateTime = toDate(startDate.atStartOfDay());
+        Date endDateTime = toDate(endDate.atStartOfDay().plusDays(1));
+        return bidRepository.findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(userNo, BidType.sell, BidStatus.bid_delete, startDateTime, endDateTime, pageRequest);
+    }
+
+    @Transactional
+    public Optional<Bid> getBuyBidByBidNo(Long bidNo) {
+
+        return bidRepository.findById(bidNo);
+    }
+
+    public UserBidDetailDto setUserBidDetailInfo(Bid bid) {
+
+        UserBidDetailDto userBidDetailDto = new UserBidDetailDto();
+
+        Payment payment = bid.getPayment();
+        ProductSize productSize = bid.getProductSize();
+        Product product = productSize.getProduct();
+
+        Set<ProductImages> productImagesSet = product.getProductImages();
+        Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+        String imageUrl = null;
+        if (optionalProductImages.isPresent()) {
+            imageUrl = optionalProductImages.get().getImageUrl();
+        }
+
+        User user = bid.getUser();
+        Set<Address> addressSet = user.getAddresses();
+        Optional<Address> optionalAddress = addressSet.stream().findFirst();
+        Address address = null;
+        if (optionalAddress.isEmpty()) {
+
+            return null;
+        }
+        address = optionalAddress.get();
+
+        userBidDetailDto.setBidInfo(bid);
+        userBidDetailDto.setProductInfo(product);
+        userBidDetailDto.setProductSizeInfo(productSize);
+        userBidDetailDto.setProductImageUrl(imageUrl);
+        userBidDetailDto.setAddressInfo(address);
+        userBidDetailDto.setPaymentInfo(payment);
+
+        return userBidDetailDto;
+    }
+
+    @Transactional
+    public void deleteBid(Bid bid) {
+
+        bid.setBidStatus(BidStatus.bid_delete);
+        bidRepository.save(bid);
+    }
 }

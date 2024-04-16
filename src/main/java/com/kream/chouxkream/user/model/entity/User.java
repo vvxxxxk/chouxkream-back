@@ -1,11 +1,13 @@
 package com.kream.chouxkream.user.model.entity;
 
+import com.kream.chouxkream.bid.model.entity.Bid;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.Set;
 @Builder
 @DynamicInsert
 @DynamicUpdate
+@ToString
 public class User {
 
     @Id
@@ -26,6 +29,7 @@ public class User {
     private Long userNo;
 
     @Column(nullable = false, unique = true, length = 20)
+    @Email
     private String email;
 
     @Column(nullable = false)
@@ -56,11 +60,19 @@ public class User {
     private boolean isActive;
 
     @Builder.Default
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private Set<UserRole> userRoles = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
     private List<Wishlist> wishlist;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    private Set<Bid> Bids = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
+    private Set<Address> addresses = new HashSet<>();
 
     public void encodePassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(password);

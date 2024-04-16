@@ -1,6 +1,6 @@
 package com.kream.chouxkream.user.repository;
 
-import com.kream.chouxkream.productsize.ProductSize;
+import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.user.model.entity.User;
 import com.kream.chouxkream.user.model.entity.Wishlist;
 import io.lettuce.core.dynamic.annotation.Param;

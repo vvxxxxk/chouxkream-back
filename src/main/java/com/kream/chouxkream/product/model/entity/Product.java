@@ -1,9 +1,5 @@
-package com.kream.chouxkream.product;
+package com.kream.chouxkream.product.model.entity;
 
-import com.kream.chouxkream.brand.Brand;
-import com.kream.chouxkream.category.Category;
-import com.kream.chouxkream.productimages.ProductImages;
-import com.kream.chouxkream.productsize.ProductSize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -61,17 +57,19 @@ public class Product {
     @Column(nullable = false, columnDefinition = "BIT DEFAULT 0")
     private boolean isActive;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_no")
     private Category category;
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<ProductImages> productImages = new HashSet<>();
 
-    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     private Set<ProductSize> productSizes = new HashSet<>();
 }

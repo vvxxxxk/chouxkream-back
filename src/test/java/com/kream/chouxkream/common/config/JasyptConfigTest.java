@@ -5,8 +5,27 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class JasyptConfigTest {
+class JasyptConfigTest extends JasyptConfig{
 
+    @Test
+    public void jasypt_encrypt_decrypt_test() {
+
+        String encrptKey = System.getProperty("jasypt.encryptor.password");
+        String plainText = "4407";
+
+        StandardPBEStringEncryptor jasypt = new StandardPBEStringEncryptor();
+        jasypt.setPassword(encrptKey);
+
+        String encryptedText = jasypt.encrypt(plainText);
+        String decryptedText = jasypt.decrypt(encryptedText);
+
+        System.out.println("encryptedText = " + encryptedText);
+        System.out.println("decryptedText = " + decryptedText);
+
+        assertThat(plainText).isEqualTo(decryptedText);
+    }
+
+<<<<<<< HEAD
     @Test
     public void stringEncryptor() {
 
@@ -25,4 +44,6 @@ class JasyptConfigTest {
 
         assertThat(plainText).isEqualTo(decryptedText);
     }
+=======
+>>>>>>> develop
 }

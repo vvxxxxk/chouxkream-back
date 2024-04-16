@@ -1,5 +1,6 @@
-package com.kream.chouxkream.productsize;
+package com.kream.chouxkream.product.repository;
 
+import com.kream.chouxkream.product.model.entity.ProductSize;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

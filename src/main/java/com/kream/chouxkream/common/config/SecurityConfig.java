@@ -23,6 +23,7 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.util.Collections;
 import java.util.List;
@@ -95,15 +96,20 @@ public class SecurityConfig {
         // ToDo. 추후 접근 권한 설정 세분화 필요. 임시로 모든 경로에 대해서 허용
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/users/**").permitAll()
+                        .antMatchers("/all", "/api/**", "/api/auth/**", "/api/users/**", "/api/products/**").permitAll()
                         .antMatchers("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**").permitAll()
-                        .antMatchers("/user", "/my").hasAnyRole("USER", "SOCIAL")
+                        .antMatchers("/user", "/my","/api/search/recent-keyword").hasAnyRole("USER", "SOCIAL")
                         .antMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint());      // ToDo. 권한 없는 페이지 가면 임시로 메인 페이지로 이동하도록
 
         // 필터 등록
+        CharacterEncodingFilter characterEncodingFilter = new CharacterEncodingFilter();
+        characterEncodingFilter.setEncoding("UTF-8");
+        characterEncodingFilter.setForceEncoding(true);
+        http
+                .addFilterBefore(characterEncodingFilter, LogoutFilter.class);
         http
                 .addFilterBefore(new JwtLogoutFilter(jwtUtils, authService), LogoutFilter.class);
         http

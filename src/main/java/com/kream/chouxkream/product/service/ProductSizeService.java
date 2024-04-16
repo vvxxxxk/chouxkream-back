@@ -1,10 +1,11 @@
-package com.kream.chouxkream.productsize;
+package com.kream.chouxkream.product.service;
 
+import com.kream.chouxkream.product.model.entity.ProductSize;
+import com.kream.chouxkream.product.repository.ProductSizeRepository;
 import com.kream.chouxkream.user.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,5 +16,4 @@ public class ProductSizeService {
         return this.productSizeRepository.findById(productSizeNo)
                 .orElseThrow(()->new ResourceNotFoundException("ProductSize not found."));
     }
-
 }

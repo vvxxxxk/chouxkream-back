@@ -7,12 +7,17 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class ResponseMessageDto {
+
+    public ResponseMessageDto(Integer code, String message, Map<String, Object> data) {
+        this.code = code;
+        this.message = message;
+        this.data = new HashMap<>();
+    }
 
     private Integer code;
     private String message;
-    private Map<String, Object> data = new HashMap<>();
+    private Map<String, Object> data;
 
     public void addData(String key, Object value) {
         data.put(key, value);

@@ -153,7 +153,7 @@ public class JwtLogoutFilter extends GenericFilterBean {
 
         response.addCookie(cookie);
 
-        StatusCode statusCode = StatusCode.LOGOUT_SUCCESS;
+        StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력

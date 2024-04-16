@@ -8,9 +8,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,7 +68,7 @@ public class ErrorHandleController {
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     public ResponseEntity<?> exceptionHandler(IllegalArgumentException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage()+"fd");
         return new ResponseEntity<>(ErrorMessageDto.builder()
                 .code(HttpStatus.BAD_REQUEST.value())
                 .message(e.getMessage())

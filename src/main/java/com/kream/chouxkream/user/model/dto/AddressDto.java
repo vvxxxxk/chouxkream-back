@@ -17,11 +17,4 @@ public class AddressDto {
     private String address; //필수
     private String detailAddress; //필수 X
     private boolean defaultAddress; //null이면 false? w자동으로 false인가보네
-//    private boolean defaultAddress = false; // default : false (true : 기본배송지로 설정 체크했을경우.)
-
-//    public void setDefaultAddress() { // 기본배송지로 설정 체크했을경우.
-//        this.defaultAddress = true;
-//    }
-
-    // 위 메서드 삭제 하기. 테스트해보고 에러 없으면.
 }
