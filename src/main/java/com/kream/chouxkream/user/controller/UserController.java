@@ -528,7 +528,7 @@ public class UserController {
         userService.DeActivateUser(email);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
     }
@@ -554,7 +554,7 @@ public class UserController {
         addressService.addAddress(optionalUser.get(), addressDto);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -582,7 +582,7 @@ public class UserController {
         List<AddressDto> addressDtoList = addressService.setAddressDto(pagingAddress);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("addressList", addressDtoList);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
@@ -606,7 +606,7 @@ public class UserController {
         addressService.updateAddress(addressNo, newaddressDto);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -629,7 +629,7 @@ public class UserController {
         addressService.setDefaultAddress(addressNo);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
     }
@@ -653,7 +653,7 @@ public class UserController {
         addressService.deleteAddress(addressNo);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -689,8 +689,6 @@ public class UserController {
         List<ProductSizeDto> productSizeDtoList = productSizeService.setProductSizeDto(pagingProductSize);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-//        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-//        responseMessageDto.addData("productSizeDtoList", productSizeDtoList);
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("productSizeDtoList", productSizeDtoList);
 
@@ -718,17 +716,11 @@ public class UserController {
         boolean isWishlistRegistered = wishlistService.updateWishlist(optionalUser.get(), productSize);
 
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = setResponseMessageDto(statusCode);
-        responseMessageDto.addData("isWishlistRegistered" , isWishlistRegistered); // 상품정보..
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("isWishlistRegistered" , isWishlistRegistered); // 상품정보
         responseMessageDto.addData("productSizeNo" , productSizeDto.getProductSizeNo());
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
-    private ResponseMessageDto setResponseMessageDto (StatusCode statusCode) {
 
-        ResponseMessageDto responseMessageDto = new ResponseMessageDto();
-        responseMessageDto.setCode(statusCode.getCode());
-        responseMessageDto.setMessage(statusCode.getMessage());
-        return responseMessageDto;
-    }
 }
