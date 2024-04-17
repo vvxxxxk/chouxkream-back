@@ -106,6 +106,7 @@ public class AddressService {
 ////        }
 //    }
 
+    @Transactional
     public void unSetDefaultAddress(Long userNo) {
         Optional<Address> myDefaultAddressOptional = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
         myDefaultAddressOptional.ifPresent(myDefaultAddress -> {

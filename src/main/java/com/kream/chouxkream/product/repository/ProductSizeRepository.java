@@ -12,4 +12,6 @@ public interface ProductSizeRepository extends JpaRepository<ProductSize, Long> 
     Optional<ProductSize> findById(Long productSizeNo);
 
     Page<ProductSize> findByProductSizeNoIn(List<Long> productSizeNoList, Pageable pageable);
+
+    Optional<ProductSize> findByProductNoAndSizeName(Long productNo, String sizeName);
 }

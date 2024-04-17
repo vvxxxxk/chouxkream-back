@@ -71,4 +71,8 @@ public class ProductSizeService {
         return productSizeDtoList;
     }
 
+    public ProductSize getProductSizeByProductNoAndSizeName(Long productNo, String sizeName) {
+        return this.productSizeRepository.findByProductNoAndSizeName(productNo, sizeName)
+                .orElse(null);
+    }
 }
