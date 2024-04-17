@@ -48,7 +48,9 @@ public class BidController {
 
         ProductSize productSize =  productSizeService.getProductSizeByProductNoAndSizeName(productNo, sizeName); //사이즈만 보내주고
 //
-//        productSize.getProduct().
+//        productSize.getProduct(). -> 이미지, 모델명,
+//        productSize. -> 사이즈명
+//        회원정보, 회원 기본 배송지정보;
 //        StatusCode statusCode = StatusCode.SUCCESS;
 //        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
 //        responseMessageDto.addData("product", productDetailDto);
@@ -56,7 +58,7 @@ public class BidController {
 //        responseMessageDto.addData("images", productImageUrlByProductNo);
 //        responseMessageDto.addData("sell_info", sellPriceList);
 //        responseMessageDto.addData("buy_info", buyPriceList);
-
+// response에 회원정봐 배송지정보 보냏야함
 //        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         return null;
     }
