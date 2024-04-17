@@ -94,18 +94,6 @@ public class AddressService {
                 .orElse(null);
     }
 
-//    public void unSetDefaultAddress(Long userNo) {
-//        Optional<Address> defaultAddress = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
-//        defaultAddress.ifPresent( myDefaultAddress -> {
-//            myDefaultAddress.setDefaultAddress(false);
-//            this.addressRepository.save(myDefaultAddress);
-//        });
-////        if (myDefaultAddress.isPresent()){
-////            myDefaultAddress.get().setDefaultAddress(false);
-////            this.addressRepository.save(myDefaultAddress.get());
-////        }
-//    }
-
     public void unSetDefaultAddress(Long userNo) {
         Optional<Address> myDefaultAddressOptional = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
         myDefaultAddressOptional.ifPresent(myDefaultAddress -> {
