@@ -12,6 +12,9 @@ public enum StatusCode {
     PRODUCT_NOT_FOUND(4001, "상품을 찾을 수 없습니다."),
     INSUFFICIENT_STOCK(4002, "재고가 부족합니다."),
 
+    // 검색 관련 에러코드
+    PAGEINFO_NOT_EXIST(4018,"검색 페이징 정보가 없습니다."),
+
     // 사용자 관련 에러 코드
     LOGIN_FAILED(4003, "로그인에 실패 하였습니다."),
     AUTH_EMAIL_CHECK_FAILED(4014, "인증메일 인증 실패 하였습니다."),
@@ -46,6 +49,8 @@ public enum StatusCode {
 
     // 이미 존재하는 리소스 관련 에러코드
     RESOURCE_ALREADY_EXISTS(4013, "해당 리소스는 이미 존재합니다.");
+
+
 
     private final Integer code;
     private final String message;

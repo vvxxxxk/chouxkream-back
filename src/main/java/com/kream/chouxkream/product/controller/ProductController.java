@@ -84,7 +84,11 @@ public class ProductController {
                                                      @RequestParam(value = "color", required = false) List<String> color,
                                                      @RequestParam(value = "sort", required = false) String sort,
                                                      @RequestBody(required = false) SearchDTO searchDTO) {
-
+        if(searchDTO==null){
+            StatusCode statusCode = StatusCode.PAGEINFO_NOT_EXIST;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
         searchDTO.setKeyword(keyword);
         searchDTO.setCategory(category);
         searchDTO.setBrand(brand);
