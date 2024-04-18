@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -84,6 +85,24 @@ public class AddressService {
     }
 
     @Transactional
+    public List<AddressDto> setAddressDtoList(Set<Address> addressSets) {
+        List<AddressDto> userAddressDtoList = new ArrayList<>();
+        for (Address address : addressSets) {
+            AddressDto addressDto = new AddressDto();
+            addressDto.setAddressNo(address.getAddressNo());
+            addressDto.setReceiverName(address.getReceiverName());
+            addressDto.setReceiverPhone(address.getReceiverPhone());
+            addressDto.setZipcode(address.getZipcode());
+            addressDto.setAddress(address.getAddress());
+            addressDto.setDetailAddress(address.getDetailAddress());
+            addressDto.setDefaultAddress(address.isDefaultAddress());
+
+            userAddressDtoList.add(addressDto);
+        }
+        return userAddressDtoList;
+    }
+
+    @Transactional
     public void deleteAddress(Long addressNo){
         Address address = addressRepository.findById(addressNo).get();
         addressRepository.delete(address);
@@ -94,6 +113,7 @@ public class AddressService {
                 .orElse(null);
     }
 
+    @Transactional
     public void unSetDefaultAddress(Long userNo) {
         Optional<Address> myDefaultAddressOptional = this.addressRepository.findByUserUserNoAndDefaultAddressIsTrue(userNo);
         myDefaultAddressOptional.ifPresent(myDefaultAddress -> {
