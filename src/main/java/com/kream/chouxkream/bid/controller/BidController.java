@@ -42,8 +42,7 @@ public class BidController {
     public ResponseEntity<ResponseMessageDto> getBuyBidFromData(@PathVariable("product_no") Long productNo,
                                                                 @RequestParam("size_name") String sizeName) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName();
-        String email = "ee121111@test.com";
+        String email = authentication.getName();
 
         // 사용자 조회
         Optional<User> optionalUser = userService.findByEmail(email);
@@ -73,15 +72,13 @@ public class BidController {
     }
 
     @ApiOperation(value = "구매 입찰 등록")
-    @PostMapping("/buy/{product_no}") // 바로구매 -> 최저입찰가 등록, 일반구매 -> 입찰가 선택해서 입찰 등록 : 둘다 암튼 입찰등록
+    @PostMapping("/buy/{product_no}")
     public ResponseEntity<ResponseMessageDto> addBidForBuying(@PathVariable("product_no") Long productNo,
                                                               @RequestParam("product_size_no") Long productSizeNo,
-                                                              @RequestBody PurchaseDto purchaseDto) { //q배송지, 포인트사용여부,,새배송지추가된거 비드디티오? 페이먼트디티오?
-        // 펄처스 디티오에 ㅠ페이먼트 스트링으로 받아오고 비드도 받아와서, 밑에 코드에서 디비에저장하고, 펄쳐스 디티오 리스폰스해서
-        //프론트에서 결제페이지 로드하도록.
+                                                              @RequestBody PurchaseDto purchaseDto) { // 배송지추가 -> addresscontroller에 배송지추가 api재사용 하기
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        //        String email = authentication.getName();
-        String email = "ee121111@test.com";
+        String email = authentication.getName();
 
         // 사용자 조회
         Optional<User> optionalUser = userService.findByEmail(email);
@@ -93,16 +90,17 @@ public class BidController {
         }
 
         ProductSize productSize =  productSizeService.getProductSizeByNo(productSizeNo);//구매입찰 에선 재고체크 X.
-        Bid newBid = bidService.addBid(optionalUser.get(), productSize, purchaseDto.getPrice());
-//        PurchaseDto newPurchaseDto = new PurchaseDto(optionalUser.get().getUserNo(), newBid.getBidNo(), purchaseDto.getAddressNo(), purchaseDto.getPaymentNo(), purchaseDto.getPrice());
+        bidService.addBuyBid(optionalUser.get(), productSize, purchaseDto.getPrice()); // 판매 bid등록. --> 추후 purchase와 연결할지 고민중.
+        PurchaseDto purchaseDtoForPayment = new PurchaseDto(optionalUser.get().getUserNo(), purchaseDto.getAddressNo() , purchaseDto.getPaymentMethod(), purchaseDto.getPrice(), purchaseDto.getPointToUse());
 
 
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-//        responseMessageDto.addData("purchaseInfo", newPurchaseDto);
+        responseMessageDto.addData("purchaseInfoForPayment", purchaseDtoForPayment);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
     }
+
 
 
 }

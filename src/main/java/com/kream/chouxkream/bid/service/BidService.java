@@ -21,7 +21,7 @@ public class BidService {
     private final BidRepository bidRepository;
 
 
-    public Bid addBid(User user, ProductSize productSize, int price) {
+    public Bid addBuyBid(User user, ProductSize productSize, int price) {
         Bid bid = Bid.builder()
                 .bidType(BidType.buy)
                 .bidPrice(price)
