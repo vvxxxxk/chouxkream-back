@@ -45,7 +45,7 @@ public class ProductSizeService {
     }
 
     @Transactional
-    public List<ProductSizeDto> setProductSizeDto(Page<ProductSize> pagingProductSize) {
+    public List<ProductSizeDto> setProductSizeDtoList(Page<ProductSize> pagingProductSize) {
         List<ProductSizeDto> productSizeDtoList = new ArrayList<>();
 
 
@@ -71,8 +71,24 @@ public class ProductSizeService {
         return productSizeDtoList;
     }
 
+    @Transactional
+    public ProductSizeDto setProductSizeDto(ProductSize productSize) {
+        ProductSizeDto productSizeDto = new ProductSizeDto();
+        productSizeDto.setProductSizeNo(productSize.getProductSizeNo());
+        productSizeDto.setSizeName(productSize.getSizeName());
+
+        Set<ProductImages> productImagesSet = productSize.getProduct().getProductImages();
+        Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+        String imageUrl = null;
+        if (optionalProductImages.isPresent()) {
+            imageUrl = optionalProductImages.get().getImageUrl();
+        }
+        productSizeDto.setImageUrl(imageUrl);
+        return productSizeDto;
+    }
+
     public ProductSize getProductSizeByProductNoAndSizeName(Long productNo, String sizeName) {
-        return this.productSizeRepository.findByProductNoAndSizeName(productNo, sizeName)
+        return this.productSizeRepository.findByProductProductNoAndSizeName(productNo, sizeName)
                 .orElse(null);
     }
 }

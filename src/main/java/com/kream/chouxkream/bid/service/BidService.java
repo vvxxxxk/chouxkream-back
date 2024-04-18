@@ -21,7 +21,7 @@ public class BidService {
     private final BidRepository bidRepository;
 
 
-    public void addBid(User user, ProductSize productSize, int price) {
+    public Bid addBid(User user, ProductSize productSize, int price) {
         Bid bid = Bid.builder()
                 .bidType(BidType.buy)
                 .bidPrice(price)
@@ -31,6 +31,11 @@ public class BidService {
                 .productSize(productSize)
                 .build();
 
-        this.bidRepository.save(bid);
+        return this.bidRepository.save(bid);
+    }
+
+    public Bid getBidByBidNo(Long bidNo) {
+        return this.bidRepository.findById(bidNo)
+                .orElse(null);
     }
 }

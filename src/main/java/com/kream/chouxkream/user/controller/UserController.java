@@ -39,7 +39,6 @@ public class UserController {
     private final WishlistService wishlistService;
     private final AddressService addressService;
     private final UserService userService;
-    private final ProductService productService;
     private final ProductSizeService productSizeService;
 
     @ApiOperation(value = "회원가입")
@@ -686,7 +685,7 @@ public class UserController {
         List<ProductSize> myWishProductSizes = productSizeService.getMyWishListProductSizes(myWishList);
 
         Page<ProductSize> pagingProductSize = productSizeService.getPagedProductSizes(myWishProductSizes, pageRequest);
-        List<ProductSizeDto> productSizeDtoList = productSizeService.setProductSizeDto(pagingProductSize);
+        List<ProductSizeDto> productSizeDtoList = productSizeService.setProductSizeDtoList(pagingProductSize);
 
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
