@@ -24,7 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.kream.chouxkream.auth.constants.AuthConst.*;
 
@@ -91,7 +93,15 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         ObjectMapper objectMapper = new ObjectMapper();
         StatusCode statusCode = StatusCode.SUCCESS;
-        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+
+        // 응답 메시지에 토큰 정보 추가
+        Map<String, Object> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), tokens);
+        responseMessageDto.setData(tokens);
+
+        log.debug("responseMessageDto = {}", responseMessageDto);
 
         // ResponseEntity를 이용하여 JSON 형태로 변환하여 출력
         String body = objectMapper.writeValueAsString(responseMessageDto);
