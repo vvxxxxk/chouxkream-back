@@ -1,6 +1,7 @@
 package com.kream.chouxkream.bid.controller;
 
 import com.kream.chouxkream.bid.model.dto.PurchaseDto;
+import com.kream.chouxkream.bid.model.dto.SellingDto;
 import com.kream.chouxkream.bid.model.entity.Bid;
 import com.kream.chouxkream.bid.service.BidService;
 import com.kream.chouxkream.common.model.dto.ResponseMessageDto;
@@ -89,14 +90,44 @@ public class BidController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
-        ProductSize productSize =  productSizeService.getProductSizeByNo(productSizeNo);//구매입찰 에선 재고체크 X.
-        bidService.addBuyBid(optionalUser.get(), productSize, purchaseDto.getPrice()); // 판매 bid등록. --> 추후 purchase와 연결할지 고민중.
+        ProductSize productSize =  productSizeService.getProductSizeByNo(productSizeNo);
+        bidService.addBuyBid(optionalUser.get(), productSize, purchaseDto.getPrice());
         PurchaseDto purchaseDtoForPayment = new PurchaseDto(optionalUser.get().getUserNo(), purchaseDto.getAddressNo() , purchaseDto.getPaymentMethod(), purchaseDto.getPrice(), purchaseDto.getPointToUse());
 
 
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("purchaseInfoForPayment", purchaseDtoForPayment);
+        return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+
+    }
+
+    @ApiOperation(value = "판매 입찰 등록")
+    @PostMapping("/sell/{product_no}")
+    public ResponseEntity<ResponseMessageDto> addBidForSelling(@PathVariable("product_no") Long productNo,
+                                                              @RequestParam("product_size_no") Long productSizeNo,
+                                                              @RequestBody SellingDto sellingDto) { // 배송지추가 -> addresscontroller에 배송지추가 api재사용 하기
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+        String email = "ee121111@test.com";
+        // 사용자 조회
+        Optional<User> optionalUser = userService.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
+        }
+
+        ProductSize productSize =  productSizeService.getProductSizeByNo(productSizeNo); // 재고(stock) +1 해야하는지?
+        bidService.addSellBId(optionalUser.get(), productSize, sellingDto.getPrice());
+        SellingDto sellingDtoForPayment = new SellingDto(optionalUser.get().getUserNo(), sellingDto.getAddressNo(), sellingDto.getPaymentMethod(), sellingDto.getPrice(), sellingDto.getAccount(), sellingDto.getBankName());
+
+
+        StatusCode statusCode = StatusCode.SUCCESS;
+        ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
+        responseMessageDto.addData("sellingDtoForPayment", sellingDtoForPayment);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
 
     }

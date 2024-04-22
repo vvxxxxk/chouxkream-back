@@ -38,4 +38,17 @@ public class BidService {
         return this.bidRepository.findById(bidNo)
                 .orElse(null);
     }
+
+    public Bid addSellBId(User user, ProductSize productSize, int price) {
+        Bid bid = Bid.builder()
+                .bidType(BidType.sell)
+                .bidPrice(price)
+                .createDate(Timestamp.valueOf(LocalDateTime.now()))
+                .bidStatus(BidStatus.bid_progress)
+                .user(user)
+                .productSize(productSize)
+                .build();
+
+        return this.bidRepository.save(bid);
+    }
 }
