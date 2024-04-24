@@ -36,16 +36,18 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
 public class UserController {
-    private final WishlistService wishlistService;
-    private final AddressService addressService;
+
     private final UserService userService;
     private final ProductSizeService productSizeService;
+    private final AddressService addressService;
+    private final WishlistService wishlistService;
 
     @ApiOperation(value = "회원가입")
     @PostMapping("/join")
     public ResponseEntity<ResponseMessageDto> join(@Valid @RequestBody UserJoinDto userJoinDto) {
 
-        // 이메일 인증 여부 체크
+        // 이메일 인증 체크
+        // 이메일 미인증 시 4007 상태코드 반환
         if (!userJoinDto.isEmailAuth()) {
 
             StatusCode statusCode = StatusCode.MISSING_REQUIRED_FIELD;
@@ -54,6 +56,7 @@ public class UserController {
         }
 
         // 이메일 중복 체크
+        // 중복된 이메일인 경우 4013 상태코드 반환
         boolean isEmailDuplicate = userService.isEmailExists(userJoinDto.getEmail());
         if (isEmailDuplicate) {
 
@@ -63,8 +66,8 @@ public class UserController {
         }
 
         // 회원가입
+        // 회원가입 성공 시 2000 상태코드 반환
         userService.join(userJoinDto);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
@@ -74,9 +77,9 @@ public class UserController {
     @PostMapping("/auth-email")
     public ResponseEntity<ResponseMessageDto> sendAuthEmail(@Valid @RequestBody EmailDto emailDto) throws MessagingException {
 
-        // Async 메서드
+        // 인증 메일 발송 - Async 메서드
+        // 인증 메일 발송 성공 시 2000 상태코드 반환
         userService.sendAuthEmail(emailDto.getEmail());
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
@@ -86,8 +89,9 @@ public class UserController {
     @PostMapping("/")
     public ResponseEntity<ResponseMessageDto> checkAuthNumber(@Valid @RequestBody AuthEmailCheckDto authEmailCheckDto) {
 
+        // 인증 번호 체크
+        // 인증 실패 시 4014 상태코드 반환, 성공 시 2000 상태코드 반환
         boolean isAuthEmailCheck = userService.checkAuthNumber(authEmailCheckDto.getEmail(), authEmailCheckDto.getAuthNumber());
-
         if (!isAuthEmailCheck) {
 
             StatusCode statusCode = StatusCode.AUTH_EMAIL_CHECK_FAILED;
@@ -105,9 +109,10 @@ public class UserController {
     @GetMapping("/email")
     public ResponseEntity<ResponseMessageDto> findEmailByPhoneNumber(@Valid @RequestBody PhoneNumberDto phoneNumberDto) {
 
-        Optional<User> optionalUser = userService.findByPhoneNumber(phoneNumberDto.getPhoneNumber());
-
-        if (optionalUser.isEmpty()) {
+        // 이메일 찾기
+        // 이메일 찾기 성공 시 masking 된 이메일 반환, 실패 시 null 반환
+        String maskingEmail = userService.findEmailByPhoneNumber(phoneNumberDto.getPhoneNumber());
+        if (maskingEmail == null) {
 
             StatusCode statusCode = StatusCode.FIND_EAMIL_FAILED;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
@@ -116,21 +121,9 @@ public class UserController {
 
             StatusCode statusCode = StatusCode.SUCCESS;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            String maskingEmail = emailMasking(optionalUser.get().getEmail());
             responseMessageDto.addData("email", maskingEmail);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
-    }
-
-    private String emailMasking(String email) {
-
-        int pos = email.indexOf('@');
-        String id = email.substring(0, pos);
-
-        // 아이디 앞 2글자를 제외한 나머지를 *로 마스킹
-        return id.substring(0, Math.min(id.length(), 2)) +
-                email.substring(2, pos).replaceAll(".", "*") +  // 정규 표현식에서 .은 임의의 문자 하나를 의미
-                email.substring(pos);
     }
 
     @ApiOperation(value = "회원 정보 조회")
@@ -140,19 +133,19 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
+        // 회원 정보 조회
+        // 조회 성공 시 UserInfoDto 객체 반환, 실패 시 null 반환
+        UserInfoDto userInfo = userService.getUserInfo(email);
+        if (userInfo == null) {
 
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         } else {
 
-            UserInfoDto userInfoDto = new UserInfoDto(optionalUser.get());
-
             StatusCode statusCode = StatusCode.SUCCESS;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            responseMessageDto.addData("user", userInfoDto);
+            responseMessageDto.addData("user", userInfo);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
     }
@@ -165,16 +158,8 @@ public class UserController {
         String email = authentication.getName();
         String updateEmail = updateEmailDto.getEmail();
 
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
         // 변경 후 이메일 중복 검증
+        // 이미 존재하는 이메일이라면 true, 존재하지 않는 이메일이라면 false
         boolean isEmailDuplicate = userService.isEmailExists(updateEmail);
         if (isEmailDuplicate) {
 
@@ -183,8 +168,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
+        // 이메일 변경
         userService.updateEmail(email, updateEmail);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("updateEmail", updateEmail);
@@ -198,21 +183,11 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        String updateName = usernameDto.getUsername();
-        userService.updateName(email, updateName);
-
+        // 사용자 이름 변경
+        userService.updateName(email, usernameDto.getUsername());
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-        responseMessageDto.addData("updateName", updateName);
+        responseMessageDto.addData("updateName", usernameDto.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -223,18 +198,10 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
         String updateNickname = nicknameDto.getNickname();
 
         // 닉네임 중복 검증
+        // 이미 존재하는 닉네임일 경우 true, 존재 하지 않는 닉네임인 경우 false
         boolean isNicknameExists = userService.isNicknameExists(updateNickname);
         if (isNicknameExists) {
 
@@ -243,8 +210,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
+        // 사용자 닉네임 변경
         userService.updateNickname(email, updateNickname);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         responseMessageDto.addData("updateNickname", updateNickname);
@@ -258,21 +225,11 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        String updateUserDesc = userDescDto.getUserDesc();
-        userService.updateUserDesc(email, updateUserDesc);
-
+        // 사용자 소개글 변경
+        userService.updateUserDesc(email, userDescDto.getUserDesc());
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-        responseMessageDto.addData("updateUserDesc", updateUserDesc);
+        responseMessageDto.addData("updateUserDesc", userDescDto.getUserDesc());
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -283,25 +240,18 @@ public class UserController {
         String email = phoneNumberAndEmailDto.getEmail();
         String phoneNumber = phoneNumberAndEmailDto.getPhoneNumber();
 
-        // 사용자 조회
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-        // 사용자 정보와 입력한 연락처 비교
-        if (!optionalUser.get().getPhoneNumber().equals(phoneNumber)) {
+        // 사용자가 입력한 이메일, 연락처 매칭
+        // 이메일이 존재하고 이메일과 연락처가 매칭되면 true, 이메일이 존재하지 않거나 이메일과 연락처가 매칭되지 않으면 false
+        boolean isMatched = userService.checkMatchingEmailAndPhoneNumber(email, phoneNumber);
+        if (!isMatched) {
 
             StatusCode statusCode = StatusCode.FIND_USER_FAILED;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
-        // 임시 비밀번호 발급
+        // 임시 비밀번호 발급 - Async 메서드
         userService.sendTempPasswordEmail(email);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
@@ -314,16 +264,8 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 검증
-        boolean isExistEmail = userService.isEmailExists(email);
-        if (!isExistEmail) {
-
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
         // 수정 전 비밀번호, 수정 후 비밀번호 비교
+        // 수정 전 비밀번호와 수정 후 비밀번호가 같을 경우 4017 상태코드 반환
         String oldPassword = updatePasswordDto.getOldPassword();
         String newPassword = updatePasswordDto.getNewPassword();
         if (oldPassword.equals(newPassword)) {
@@ -333,8 +275,9 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
-        // 입력한 비밀번호 검증
-        boolean isCheckPassword = userService.isPasswordCheck(email, oldPassword);
+        // 비밀번호 확인
+        // 입력한 비밀번호가 현재 비밀번호와 일치하면 true, 일치하지 않으면 false
+        boolean isCheckPassword = userService.checkPassword(email, oldPassword);
         if (!isCheckPassword) {
 
             StatusCode statusCode = StatusCode.USER_INFO_UPDATE_FAILED;
@@ -344,7 +287,6 @@ public class UserController {
 
         // 비밀번호 수정
         userService.updatePassword(email, newPassword);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
@@ -360,22 +302,16 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 조회
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
+        // 사용자 정보 조회
+        UserInfoDto userInfo = userService.getUserInfo(email);
+        Long userNo = userInfo.getUserNo();
 
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        Long userNo = optionalUser.get().getUserNo();
-
+        // 페이징 및 구매 입찰 목록 조회
         Sort sort = Sort.by(Sort.Direction.DESC, "createDate");
         PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
-
         Page<Bid> pagingBuyBid = userService.getPagedBuyBidByUserNo(userNo, startDate, endDate, pageRequest);
 
+        // 페이징한 구매 입찰 목록으로 구매 입찰 정보 리스트를 작성
         List<UserBidDto> userBidDtoList = userService.setUserBidInfo(pagingBuyBid);
 
         StatusCode statusCode = StatusCode.SUCCESS;
@@ -394,20 +330,16 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 조회
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
+        // 사용자 정보 조회
+        UserInfoDto userInfo = userService.getUserInfo(email);
+        Long userNo = userInfo.getUserNo();
 
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        Long userNo = optionalUser.get().getUserNo();
+        // 페이징 및 판매 입찰 목록 조회
         Sort sort = Sort.by(Sort.Direction.DESC, "createDate");
         PageRequest pageRequest = PageRequest.of(cursor - 1, perPage, sort);
         Page<Bid> pagingSellBid = userService.getPagedSellBidByUserNo(userNo, startDate, endDate, pageRequest);
 
+        // 페이징한 판매 입찰 목록으로 판매 입찰 정보 리스트를 작성
         List<UserBidDto> userBidDtoList = userService.setUserBidInfo(pagingSellBid);
 
         StatusCode statusCode = StatusCode.SUCCESS;
@@ -423,30 +355,22 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 조회
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
+        // 사용자 정보 조회
+        UserInfoDto userInfo = userService.getUserInfo(email);
+        Long userNo = userInfo.getUserNo();
 
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-
-        // 결제 정보 조회
-        Optional<Bid> optionalBid = userService.getBuyBidByBidNo(bidNo);
-        if (optionalBid.isEmpty()) {
+        // 입찰 상세 정보 조회
+        UserBidDetailDto bidDetailInfo = userService.getBidDetailInfo(userNo, bidNo);
+        if (bidDetailInfo == null) {
 
             StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
 
-        Bid bid = optionalBid.get();
-        UserBidDetailDto userBidDetailDto = userService.setUserBidDetailInfo(bid);
-
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-        responseMessageDto.addData("buyBidDetail", userBidDetailDto);
+        responseMessageDto.addData("BidDetail", bidDetailInfo);
         return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
     }
 
@@ -457,27 +381,19 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        // 사용자 조회
-        Optional<User> optionalUser = userService.findByEmail(email);
-        if (optionalUser.isEmpty()) {
+        // 사용자 정보 조회
+        UserInfoDto userInfo = userService.getUserInfo(email);
+        Long userNo = userInfo.getUserNo();
 
-            StatusCode statusCode = StatusCode.FIND_USER_FAILED;
+        // 사용자가 입찰한 내역인지 검증 후 삭제
+        // 성공 시 true, 실패 시 false
+        boolean isDeleted = userService.deleteBid(userNo, bidNo);
+        if (!isDeleted) {
+
+            StatusCode statusCode = StatusCode.USER_INFO_UPDATE_FAILED;
             ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
             return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
         }
-
-        // 결제 정보 조회
-        Optional<Bid> optionalBid = userService.getBuyBidByBidNo(bidNo);
-        if (optionalBid.isEmpty()) {
-
-            StatusCode statusCode = StatusCode.PRODUCT_NOT_FOUND;
-            ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);
-            return ResponseEntity.status(HttpStatus.OK).body(responseMessageDto);
-        }
-        Bid bid = optionalBid.get();
-
-        userService.deleteBid(bid);
-
 
         StatusCode statusCode = StatusCode.SUCCESS;
         ResponseMessageDto responseMessageDto = new ResponseMessageDto(statusCode.getCode(), statusCode.getMessage(), null);

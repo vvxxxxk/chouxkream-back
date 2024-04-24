@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface BidRepository extends JpaRepository<Bid, Long> {
 
@@ -21,4 +22,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Integer findMaxBidPriceByProductSizeNo(Long productSizeNo);
 
     Page<Bid> findByUserUserNoAndBidTypeAndBidStatusNotAndCreateDateBetween(Long userNo, BidType bidType, BidStatus bidStatus, Date startDate, Date endDate, Pageable pageable);
+
+    Optional<Bid> findByUserUserNoAndBidNo(Long userNo, Long bidNo);
 }

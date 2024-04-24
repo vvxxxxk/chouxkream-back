@@ -10,10 +10,7 @@ import com.kream.chouxkream.product.model.entity.ProductImages;
 import com.kream.chouxkream.product.model.entity.ProductSize;
 import com.kream.chouxkream.role.entity.Role;
 import com.kream.chouxkream.role.repository.RoleRepository;
-import com.kream.chouxkream.user.model.dto.UserBidDetailDto;
-import com.kream.chouxkream.user.model.dto.UserBidDto;
-import com.kream.chouxkream.user.model.dto.UserJoinDto;
-import com.kream.chouxkream.user.model.dto.UserRoleKey;
+import com.kream.chouxkream.user.model.dto.*;
 import com.kream.chouxkream.user.model.entity.Address;
 import com.kream.chouxkream.user.model.entity.AuthNumber;
 import com.kream.chouxkream.user.model.entity.User;
@@ -85,11 +82,10 @@ public class UserService {
     }
 
     @Async
-    public void sendAuthEmail(String email) throws MessagingException {
+    public void sendAuthEmail(String toEmail) throws MessagingException {
 
         String authNum = makeAuthNumber();
-        String setFrom = "shhwang0930@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
-        String toMail = email;
+        String setFrom = "shhwang0930@gmail.com";
         String title = "[CHOUXKREAM]회원가입 인증 이메일";
         String content =
                 "CHOUXKREAM을 방문해주셔서 감사합니다." +
@@ -99,25 +95,25 @@ public class UserService {
                 "인증번호를 제대로 입력해주세요";
 
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message,true,"utf-8");//이메일 메시지와 관련된 설정을 수행합니다.
-        // true를 전달하여 multipart 형식의 메시지를 지원하고, "utf-8"을 전달하여 문자 인코딩을 설정
-        helper.setFrom(setFrom);    //이메일의 발신자 주소 설정
-        helper.setTo(toMail);       //이메일의 수신자 주소 설정
-        helper.setSubject(title);   //이메일의 제목을 설정
-        helper.setText(content,true);//이메일의 내용 설정 두 번째 매개 변수에 true를 설정하여 html 설정으로한다.
+        MimeMessageHelper helper = new MimeMessageHelper(message,true,"utf-8");
+        helper.setFrom(setFrom);
+        helper.setTo(toEmail);
+        helper.setSubject(title);
+        helper.setText(content,true);
         mailSender.send(message);
 
-        AuthNumber authNumber = new AuthNumber(email, authNum);
+        AuthNumber authNumber = new AuthNumber(toEmail, authNum);
         authNumberRepositroy.save(authNumber);
     }
 
     public String makeAuthNumber() {
-        Random r = new Random();
-        String randomNumber = "";
-        for(int i = 0; i < 6; i++)
-            randomNumber += Integer.toString(r.nextInt(10));
 
-        return randomNumber;
+        Random r = new Random();
+        StringBuilder randomNumber = new StringBuilder();
+        for(int i = 0; i < 6; i++)
+            randomNumber.append(Integer.toString(r.nextInt(10)));
+
+        return randomNumber.toString();
     }
 
     public boolean checkAuthNumber(String email, String authNum) {
@@ -126,27 +122,53 @@ public class UserService {
         if (optionalAuthNumber.isPresent()) {
 
             AuthNumber authNumber = optionalAuthNumber.get();
-
             if (email.equals(authNumber.getEmail()) && authNum.equals(authNumber.getAuthNum())) {
+
                 return true;
             } else {
+
                 return false;
             }
         } else {
+
             return false;
         }
     }
 
     @Transactional
-    public Optional<User> findByPhoneNumber(String phoneNumber) {
+    public String findEmailByPhoneNumber(String phoneNumber) {
 
-        return userRepository.findByPhoneNumber(phoneNumber);
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        return optionalUser.map(user -> emailMasking(user.getEmail())).orElse(null);
+    }
+
+    private String emailMasking(String email) {
+
+        int pos = email.indexOf('@');
+        String id = email.substring(0, pos);
+
+        // 아이디 앞 2글자를 제외한 나머지를 *로 마스킹
+        return id.substring(0, Math.min(id.length(), 2)) +
+                email.substring(2, pos).replaceAll(".", "*") +  // 정규 표현식에서 .은 임의의 문자 하나를 의미
+                email.substring(pos);
     }
 
     @Transactional
     public Optional<User> findByEmail(String email) {
 
         return userRepository.findByEmail(email);
+    }
+
+    public UserInfoDto getUserInfo(String email) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+
+            return null;
+        } else {
+
+            return new UserInfoDto(optionalUser.get());
+        }
     }
 
     @Transactional
@@ -201,6 +223,17 @@ public class UserService {
             user.setUserDesc(updateUserDesc);
             userRepository.save(user);
         }
+    }
+
+    @Transactional
+    public boolean checkMatchingEmailAndPhoneNumber(String email, String phoneNumber) {
+
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent()) {
+
+            return optionalUser.get().getPhoneNumber().equals(phoneNumber);
+        }
+        return false;
     }
 
     @Async
@@ -270,18 +303,14 @@ public class UserService {
     }
 
     @Transactional
-    public boolean isPasswordCheck(String email, String password) {
+    public boolean checkPassword(String email, String password) {
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
+
             return false;
         }
-
-        User user = optionalUser.get();
-        if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            return true;
-        }
-        return false;
+        return bCryptPasswordEncoder.matches(password, optionalUser.get().getPassword());
     }
 
     @Transactional
@@ -374,50 +403,60 @@ public class UserService {
     }
 
     @Transactional
-    public Optional<Bid> getBuyBidByBidNo(Long bidNo) {
+    public UserBidDetailDto getBidDetailInfo(Long userNo, Long bidNo) {
 
-        return bidRepository.findById(bidNo);
-    }
 
-    public UserBidDetailDto setUserBidDetailInfo(Bid bid) {
+        Optional<Bid> optionalBid = bidRepository.findByUserUserNoAndBidNo(userNo, bidNo);
+        if (optionalBid.isPresent()) {
+            Bid bid = optionalBid.get();
 
-        UserBidDetailDto userBidDetailDto = new UserBidDetailDto();
+            UserBidDetailDto userBidDetailDto = new UserBidDetailDto();
 
-        Payment payment = bid.getPayment();
-        ProductSize productSize = bid.getProductSize();
-        Product product = productSize.getProduct();
+            Payment payment = bid.getPayment();
+            ProductSize productSize = bid.getProductSize();
+            Product product = productSize.getProduct();
 
-        Set<ProductImages> productImagesSet = product.getProductImages();
-        Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
-        String imageUrl = null;
-        if (optionalProductImages.isPresent()) {
-            imageUrl = optionalProductImages.get().getImageUrl();
+            Set<ProductImages> productImagesSet = product.getProductImages();
+            Optional<ProductImages> optionalProductImages = productImagesSet.stream().findFirst();
+            String imageUrl = null;
+            if (optionalProductImages.isPresent()) {
+                imageUrl = optionalProductImages.get().getImageUrl();
+            }
+
+            User user = bid.getUser();
+            Set<Address> addressSet = user.getAddresses();
+            Optional<Address> optionalAddress = addressSet.stream().findFirst();
+            Address address = null;
+            if (optionalAddress.isEmpty()) {
+
+                return null;
+            }
+            address = optionalAddress.get();
+
+            userBidDetailDto.setBidInfo(bid);
+            userBidDetailDto.setProductInfo(product);
+            userBidDetailDto.setProductSizeInfo(productSize);
+            userBidDetailDto.setProductImageUrl(imageUrl);
+            userBidDetailDto.setAddressInfo(address);
+            userBidDetailDto.setPaymentInfo(payment);
+
+            return userBidDetailDto;
         }
 
-        User user = bid.getUser();
-        Set<Address> addressSet = user.getAddresses();
-        Optional<Address> optionalAddress = addressSet.stream().findFirst();
-        Address address = null;
-        if (optionalAddress.isEmpty()) {
-
-            return null;
-        }
-        address = optionalAddress.get();
-
-        userBidDetailDto.setBidInfo(bid);
-        userBidDetailDto.setProductInfo(product);
-        userBidDetailDto.setProductSizeInfo(productSize);
-        userBidDetailDto.setProductImageUrl(imageUrl);
-        userBidDetailDto.setAddressInfo(address);
-        userBidDetailDto.setPaymentInfo(payment);
-
-        return userBidDetailDto;
+        return null;
     }
 
     @Transactional
-    public void deleteBid(Bid bid) {
+    public boolean deleteBid(Long userNo, Long bidNo) {
 
-        bid.setBidStatus(BidStatus.bid_delete);
-        bidRepository.save(bid);
+        Optional<Bid> optionalBid = bidRepository.findByUserUserNoAndBidNo(userNo, bidNo);
+        if (optionalBid.isPresent()) {
+
+            optionalBid.get().setBidStatus(BidStatus.bid_delete);
+            bidRepository.save(optionalBid.get());
+            return true;
+        }
+
+        return false;
     }
 }
