@@ -52,19 +52,3 @@
     <img src="https://img.shields.io/badge/node-339933?style=for-the-badge&logo=node&logoColor=white">
     <img src="https://img.shields.io/badge/vite-646CFF?style=for-the-badge&logo=vite&logoColor=white">
 </div>
-
-<br>
-
-## 시연 영상 또는 사진
-### 작성 예정
-### 작성 예정
-### 작성 예정
-### 작성 예정
-
-<br>
-
-## 배포 서버
-### 작성 예정
-### 작성 예정
-
-<br>
