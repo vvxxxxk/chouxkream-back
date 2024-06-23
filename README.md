@@ -26,7 +26,6 @@
 ## 📄 프로젝트 문서
 ### <sub>[기술스택](https://tender-bunny-45c.notion.site/a1eb692c94044b5980c8d2aae37b38a7?pvs=25)</sub>
 ### <sub>[사용자 요구사항 정의서](https://tender-bunny-45c.notion.site/26a1d55b9fd444bb9fbe61916d51d428?v=a62fccee178d488286e031251b6eab47&pvs=25)</sub>
-### <sub>[관리자 요구사항 정의서](https://tender-bunny-45c.notion.site/432514fd7caa4a64b77b909bd3626b91?v=ed6157a2fb8941089de4efd3a49e9281&pvs=4)</sub>
 ### <sub>[테이블 설계](https://tender-bunny-45c.notion.site/DB-SQL-44f4d8d4ac5c4e03a4ca7f23845a3587?pvs=4)</sub>
 ### <sub>[API 명세서](https://tender-bunny-45c.notion.site/b29e844df60d4befa4dc6cce90ef0125?v=f71bd6ba36e74122a55e30a609f18762&pvs=4)</sub>
 
